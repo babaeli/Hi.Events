@@ -136,9 +136,14 @@ class CreateSuperAdminCommand extends Command
             }
 
             // Get default messaging tier
-            $defaultMessagingTier = $this->accountMessagingTierRepository->findFirstWhere([
-                'is_default' => true,
-            ]);
+            try {
+                $defaultMessagingTier = $this->accountMessagingTierRepository->findFirstWhere([
+                    'is_default' => true,
+                ]);
+            } catch (\Exception $e) {
+                // If is_default column doesn't exist, just get the first tier
+                $defaultMessagingTier = $this->accountMessagingTierRepository->all()->first();
+            }
 
             if (!$defaultMessagingTier) {
                 $defaultMessagingTier = $this->accountMessagingTierRepository->all()->first();
