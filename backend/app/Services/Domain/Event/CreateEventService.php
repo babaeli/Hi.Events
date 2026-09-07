@@ -7,7 +7,6 @@ use HiEvents\DomainObjects\Enums\EventType;
 use HiEvents\DomainObjects\Enums\HomepageBackgroundType;
 use HiEvents\DomainObjects\Enums\ImageType;
 use HiEvents\DomainObjects\Enums\PaymentProviders;
-use HiEvents\DomainObjects\Enums\ProductTerminology;
 use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\DomainObjects\EventSettingDomainObject;
 use HiEvents\DomainObjects\OrganizerDomainObject;
@@ -208,7 +207,6 @@ class CreateEventService
 
         $organizerSettings = $organizer->getOrganizerSettings();
         $organizerThemeSettings = $organizerSettings->getHomepageThemeSettings() ?? [];
-        $terminology = ProductTerminology::forCategory($event->getCategory());
 
         // Build the new homepage_theme_settings from organizer settings
         $homepageThemeSettings = [
@@ -239,8 +237,7 @@ class CreateEventService
             'homepage_secondary_text_color' => '#ffffff',
             'homepage_secondary_color' => $homepageThemeSettings['accent'],
 
-            'continue_button_text' => $terminology->defaultContinueButtonText(),
-            'get_tickets_button_text' => $terminology->defaultGetTicketsButtonText(),
+            'continue_button_text' => __('Continue'),
             'support_email' => $organizer->getEmail(),
 
             'payment_providers' => [PaymentProviders::STRIPE->value],

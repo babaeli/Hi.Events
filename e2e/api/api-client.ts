@@ -18,11 +18,9 @@ import type {
   CreateTaxOrFeePayload,
   CreateWebhookPayload,
   EmailTemplate,
-  EventImageType,
   EventRecord,
   EventSettings,
   EventStatus,
-  ImageRecord,
   InviteUserPayload,
   Me,
   Occurrence,
@@ -100,14 +98,8 @@ export async function confirmEmailWithCode(
 export class ApiClient {
   constructor(private readonly request: APIRequestContext) {}
 
-  getAccount(): Promise<{ id: number; name: string }> {
-    return unwrap<{ id: number; name: string }>(this.request.get('accounts', { headers: jsonHeaders }));
-  }
-
-  requestAccountDeletion(confirmation: string): Promise<{ id: number; status: string }> {
-    return unwrap<{ id: number; status: string }>(
-      this.request.post('accounts/deletion-request', { headers: jsonHeaders, data: { confirmation } }),
-    );
+  getAccount(): Promise<{ id: number }> {
+    return unwrap<{ id: number }>(this.request.get('accounts', { headers: jsonHeaders }));
   }
 
   createOrganizer(name: string, opts: { email?: string; currency?: string; timezone?: string } = {}): Promise<Organizer> {
@@ -130,14 +122,6 @@ export class ApiClient {
 
   createEvent(payload: CreateEventPayload): Promise<EventRecord> {
     return unwrap<EventRecord>(this.request.post('events', { headers: jsonHeaders, data: payload }));
-  }
-
-  uploadEventImage(
-    eventId: number,
-    image: { name: string; mimeType: string; buffer: Buffer },
-    type: EventImageType = 'EVENT_COVER',
-  ): Promise<ImageRecord> {
-    return unwrap<ImageRecord>(this.request.post(`events/${eventId}/images`, { multipart: { image, type } }));
   }
 
   listProductCategories(eventId: number): Promise<ProductCategory[]> {
@@ -263,25 +247,6 @@ export class ApiClient {
     return check(this.request.post(`events/${eventId}/orders/${orderId}/cancel`, { headers: jsonHeaders }));
   }
 
-  listAttendees(eventId: number): Promise<AttendeeRecord[]> {
-    return unwrap<AttendeeRecord[]>(this.request.get(`events/${eventId}/attendees`, { headers: jsonHeaders }));
-  }
-
-  async findAttendeeIdByPublicId(eventId: number, publicId: string): Promise<number> {
-    const attendees = await this.listAttendees(eventId);
-    const attendee = attendees.find((candidate) => candidate.public_id === publicId);
-    if (!attendee) {
-      throw new Error(`Attendee ${publicId} not found among ${attendees.length} attendees for event ${eventId}`);
-    }
-    return attendee.id;
-  }
-
-  updateAttendeeStatus(eventId: number, attendeeId: number, status: 'ACTIVE' | 'CANCELLED'): Promise<void> {
-    return check(
-      this.request.patch(`events/${eventId}/attendees/${attendeeId}`, { headers: jsonHeaders, data: { status } }),
-    );
-  }
-
   async generateOccurrences(eventId: number, recurrenceRule: RecurrenceRule): Promise<void> {
     const response = await this.request.post(`events/${eventId}/occurrences/generate`, {
       headers: jsonHeaders,
@@ -320,12 +285,6 @@ export class ApiClient {
   createOrganizerLocation(organizerId: number, payload: CreateOrganizerLocationPayload): Promise<{ id: number }> {
     return unwrap<{ id: number }>(
       this.request.post(`organizers/${organizerId}/locations`, { headers: jsonHeaders, data: payload }),
-    );
-  }
-
-  createOccurrence(eventId: number, payload: UpdateOccurrencePayload): Promise<Occurrence> {
-    return unwrap<Occurrence>(
-      this.request.post(`events/${eventId}/occurrences`, { headers: jsonHeaders, data: payload }),
     );
   }
 
@@ -368,32 +327,6 @@ export class AdminApiClient {
         data: { messaging_tier_id: messagingTierId },
       }),
     );
-  }
-
-  setAccountVerification(accountId: number, isManuallyVerified: boolean): Promise<void> {
-    return check(
-      this.request.put(`admin/accounts/${accountId}/verification`, {
-        headers: jsonHeaders,
-        data: { is_manually_verified: isManuallyVerified },
-      }),
-    );
-  }
-
-  async findAccountIdByEmail(email: string): Promise<number> {
-    const accounts = await unwrap<{ id: number; email: string }[]>(
-      this.request.get('admin/accounts', { headers: jsonHeaders, params: { search: email } }),
-    );
-
-    const match = accounts.find((account) => account.email === email);
-    if (!match) {
-      throw new Error(`No admin account found for ${email}`);
-    }
-
-    return match.id;
-  }
-
-  listConfigurations(): Promise<{ id: number; name: string; is_system_default: boolean; default_for_currency: string | null }[]> {
-    return unwrap(this.request.get('admin/configurations', { headers: jsonHeaders }));
   }
 
   createAnnouncement(payload: UpsertAnnouncementPayload): Promise<{ id: number }> {

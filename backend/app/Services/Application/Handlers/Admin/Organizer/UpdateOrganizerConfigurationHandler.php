@@ -27,7 +27,7 @@ class UpdateOrganizerConfigurationHandler
         $currentConfiguration = $organizer->getOrganizerConfiguration();
 
         if ($currentConfiguration !== null
-            && ! $currentConfiguration->isDefault()
+            && ! $currentConfiguration->getIsSystemDefault()
             && $this->isConfigurationDedicatedTo($currentConfiguration->getId(), $organizer->getId())
         ) {
             return $this->configurationRepository->updateFromArray(

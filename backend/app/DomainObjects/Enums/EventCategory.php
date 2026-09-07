@@ -70,17 +70,6 @@ enum EventCategory: string
         };
     }
 
-    public function terminology(): ProductTerminology
-    {
-        return match ($this) {
-            self::WELLNESS, self::SPIRITUALITY, self::DANCE => ProductTerminology::CLASSES,
-            self::WORKSHOP, self::EDUCATION => ProductTerminology::REGISTRATIONS,
-            self::TOURS => ProductTerminology::BOOKINGS,
-            self::BUSINESS, self::TECH => ProductTerminology::PASSES,
-            default => ProductTerminology::TICKETS,
-        };
-    }
-
     public function emoji(): string
     {
         return match ($this) {

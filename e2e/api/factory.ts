@@ -1,16 +1,6 @@
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import type { APIRequestContext } from '@playwright/test';
 import type { ApiClient } from './api-client';
-import type {
-  AttendeeDetailsCollection,
-  EventType,
-  Occurrence,
-  Organizer,
-  ProductPriceType,
-  PublicOrder,
-  QuestionRecord,
-} from './types';
+import type { EventType, Occurrence, Organizer, ProductPriceType, PublicOrder, QuestionRecord } from './types';
 import {
   awaitOfflinePayment,
   completePublicOrder,
@@ -31,7 +21,6 @@ export interface SeededEvent {
 
 interface SeedOptions {
   organizerId: number;
-  startDate?: string;
   price?: number;
   productType?: ProductPriceType;
   eventType?: EventType;
@@ -42,14 +31,7 @@ interface SeedOptions {
   waitlistEnabled?: boolean;
   taxIds?: number[];
   prices?: { price: number; label?: string }[];
-  attendeeDetails?: AttendeeDetailsCollection;
 }
-
-export const setAttendeeDetailsCollection = (
-  api: ApiClient,
-  eventId: number,
-  method: AttendeeDetailsCollection,
-): Promise<void> => api.updateEventSettings(eventId, { attendee_details_collection_method: method });
 
 const futureStartDate = (): string => {
   const date = new Date();
@@ -57,19 +39,6 @@ const futureStartDate = (): string => {
   date.setHours(21, 0, 0, 0);
   return date.toISOString();
 };
-
-const pastStartDate = (): string => {
-  const date = new Date();
-  date.setDate(date.getDate() - 30);
-  date.setHours(21, 0, 0, 0);
-  return date.toISOString();
-};
-
-const coverImage = (): { name: string; mimeType: string; buffer: Buffer } => ({
-  name: 'event-cover.png',
-  mimeType: 'image/png',
-  buffer: readFileSync(fileURLToPath(new URL('../fixtures/assets/event-cover.png', import.meta.url))),
-});
 
 export async function createLiveEventWithProduct(api: ApiClient, opts: SeedOptions): Promise<SeededEvent> {
   const {
@@ -86,15 +55,11 @@ export async function createLiveEventWithProduct(api: ApiClient, opts: SeedOptio
     title,
     type: eventType,
     organizer_id: organizerId,
-    start_date: opts.startDate ?? futureStartDate(),
+    start_date: futureStartDate(),
     category,
     currency: 'USD',
     timezone: 'UTC',
   });
-
-  if (eventType === 'SINGLE') {
-    await setAttendeeDetailsCollection(api, event.id, opts.attendeeDetails ?? 'PER_TICKET');
-  }
 
   const categories = await api.listProductCategories(event.id);
   const categoryId = categories[0].id;
@@ -132,7 +97,7 @@ export interface SeededDraftEvent {
 export async function createDraftEvent(
   api: ApiClient,
   organizerId: number,
-  opts: { title?: string; attendeeDetails?: AttendeeDetailsCollection } = {},
+  opts: { title?: string } = {},
 ): Promise<SeededDraftEvent> {
   const title = opts.title ?? uniqueName('E2E Event');
   const event = await api.createEvent({
@@ -144,7 +109,6 @@ export async function createDraftEvent(
     currency: 'USD',
     timezone: 'UTC',
   });
-  await setAttendeeDetailsCollection(api, event.id, opts.attendeeDetails ?? 'PER_TICKET');
   return { eventId: event.id, slug: event.slug, title };
 }
 
@@ -298,11 +262,11 @@ export async function createCompletedPaidOrder(
   publicApi: APIRequestContext,
   event: Pick<SeededEvent, 'eventId' | 'productId' | 'priceId'>,
   opts: OrderSeedOptions = {},
-): Promise<SeededOrder & { orderId: number; totalGross: number }> {
+): Promise<SeededOrder & { orderId: number }> {
   const seeded = await createAwaitingOfflineOrder(api, publicApi, event, opts);
   await api.markOrderAsPaid(event.eventId, seeded.orderId);
   const completed = await getPublicOrder(publicApi, event.eventId, seeded.orderShortId, seeded.sessionId);
-  return { ...seeded, attendees: mapAttendees(completed), totalGross: completed.total_gross };
+  return { ...seeded, attendees: mapAttendees(completed) };
 }
 
 export async function createSoldOutEvent(
@@ -320,27 +284,6 @@ export async function createSoldOutEvent(
   });
   const consumedOrder = await createCompletedOrder(publicApi, event);
   return { ...event, consumedOrder };
-}
-
-export async function createPastEventWithCoverImage(
-  api: ApiClient,
-  organizerId: number,
-  opts: { title?: string; eventType?: EventType } = {},
-): Promise<SeededEvent> {
-  const event = await createLiveEventWithProduct(api, {
-    organizerId,
-    startDate: pastStartDate(),
-    title: opts.title,
-    eventType: opts.eventType,
-  });
-
-  if (opts.eventType === 'RECURRING') {
-    await api.createOccurrence(event.eventId, { start_date: pastStartDate() });
-  }
-
-  await api.uploadEventImage(event.eventId, coverImage());
-
-  return event;
 }
 
 export async function createRecurringLiveEvent(

@@ -1,6 +1,4 @@
-import { type Frame, type FrameLocator, type Locator, type Page } from '@playwright/test';
-
-export type CheckoutSurface = Page | Frame;
+import { type Page } from '@playwright/test';
 
 export interface BuyerDetails {
   firstName: string;
@@ -8,36 +6,8 @@ export interface BuyerDetails {
   email: string;
 }
 
-export async function setWidgetQuantity(scope: Locator | FrameLocator | CheckoutSurface, quantity: number): Promise<void> {
-  const selector = scope.locator('.hi-product-quantity-selector').first();
-  const input = selector.locator('input');
-  if (!(await input.isVisible())) {
-    if (quantity === 0) {
-      return;
-    }
-    await selector.getByRole('button', { name: 'Increase quantity' }).click();
-  }
-  await input.fill(String(quantity));
-  if (quantity !== 0) {
-    await input.blur();
-  }
-}
-
 export class CheckoutPage {
-  private readonly surface: CheckoutSurface;
-
-  constructor(private readonly page: Page, surface?: CheckoutSurface) {
-    this.surface = surface ?? page;
-  }
-
-  private async reloadSurface(): Promise<void> {
-    if (this.surface === this.page) {
-      await this.page.reload();
-    } else {
-      await (this.surface as Frame).goto(this.surface.url());
-    }
-    await this.surface.waitForLoadState('networkidle');
-  }
+  constructor(private readonly page: Page) {}
 
   async gotoPublicEvent(eventId: number, slug: string): Promise<void> {
     await this.page.goto(`/event/${eventId}/${slug}`);
@@ -45,53 +15,50 @@ export class CheckoutPage {
   }
 
   async setFirstProductQuantity(quantity: number): Promise<void> {
-    await setWidgetQuantity(this.surface, quantity);
+    const input = this.page.locator('.hi-product-quantity-selector input').first();
+    await input.fill(String(quantity));
   }
 
   async setQuantityForProduct(productTitle: string, quantity: number): Promise<void> {
-    const row = this.surface.locator('.hi-product-row').filter({ hasText: productTitle });
-    await setWidgetQuantity(row, quantity);
-  }
-
-  async setAddonQuantity(addonTitle: string, quantity: number): Promise<void> {
-    const addonRow = this.surface.locator('.hi-product-addon').filter({ hasText: addonTitle });
-    await setWidgetQuantity(addonRow, quantity);
+    const row = this.page.locator('.hi-product-row').filter({ hasText: productTitle });
+    await row.locator('.hi-product-quantity-selector input').fill(String(quantity));
   }
 
   async applyPromoCode(code: string): Promise<void> {
-    await this.surface.getByText('Have a promo code?').click();
-    await this.surface.locator('.hi-promo-code-input').fill(code);
-    await this.surface.getByTestId('promo-code-apply-button').click();
+    await this.page.getByText('Have a promo code?').click();
+    await this.page.locator('.hi-promo-code-input').fill(code);
+    await this.page.getByTestId('promo-code-apply-button').click();
   }
 
   async answerTextQuestion(title: string, value: string): Promise<void> {
-    await this.surface.getByLabel(new RegExp(`^${title}`)).fill(value);
+    await this.page.getByLabel(new RegExp(`^${title}`)).fill(value);
   }
 
   async chooseRadioOption(option: string): Promise<void> {
-    await this.surface.getByRole('radio', { name: option }).check();
+    await this.page.getByRole('radio', { name: option }).check();
   }
 
   async chooseOfflinePayment(): Promise<void> {
-    const offlineTab = this.surface.getByRole('button', { name: 'Offline' });
+    const offlineTab = this.page.getByRole('button', { name: 'Offline' });
     if (await offlineTab.isVisible()) {
       await offlineTab.click();
     }
-    await this.surface.getByTestId('offline-payment-button').click();
-    await this.surface.waitForURL(/\/checkout\/\d+\/[^/]+\/summary/);
-    await this.reloadSurface();
+    await this.page.getByTestId('offline-payment-button').click();
+    await this.page.waitForURL(/\/checkout\/\d+\/[^/]+\/summary/);
+    await this.page.reload();
+    await this.page.waitForLoadState('networkidle');
   }
 
   async continueToCheckout(): Promise<void> {
-    await this.surface.getByTestId('checkout-continue-button').click();
-    await this.surface.waitForURL(/\/checkout\/\d+\/[^/]+\/details/);
+    await this.page.getByTestId('checkout-continue-button').click();
+    await this.page.waitForURL(/\/checkout\/\d+\/[^/]+\/details/);
   }
 
   private async fillContact(index: number, details: BuyerDetails): Promise<void> {
-    await this.surface.getByLabel(/^First Name/).nth(index).fill(details.firstName);
-    await this.surface.getByLabel(/^Last Name/).nth(index).fill(details.lastName);
-    await this.surface.getByLabel(/^Email Address/).nth(index).fill(details.email);
-    await this.surface.getByLabel(/^Confirm Email Address/).nth(index).fill(details.email);
+    await this.page.getByLabel(/^First Name/).nth(index).fill(details.firstName);
+    await this.page.getByLabel(/^Last Name/).nth(index).fill(details.lastName);
+    await this.page.getByLabel(/^Email Address/).nth(index).fill(details.email);
+    await this.page.getByLabel(/^Confirm Email Address/).nth(index).fill(details.email);
   }
 
   async fillOrderDetails(details: BuyerDetails): Promise<void> {
@@ -103,14 +70,15 @@ export class CheckoutPage {
   }
 
   async completeFreeOrder(): Promise<void> {
-    await this.surface.getByRole('button', { name: 'Complete Order' }).click();
-    await this.surface.waitForURL(/\/checkout\/\d+\/[^/]+\/summary/);
-    await this.reloadSurface();
+    await this.page.getByRole('button', { name: 'Complete Order' }).click();
+    await this.page.waitForURL(/\/checkout\/\d+\/[^/]+\/summary/);
+    await this.page.reload();
+    await this.page.waitForLoadState('networkidle');
   }
 
   async continueToPayment(): Promise<void> {
-    await this.surface.getByRole('button', { name: 'Continue to Payment' }).click();
-    await this.surface.waitForURL(/\/checkout\/\d+\/[^/]+\/payment/);
+    await this.page.getByRole('button', { name: 'Continue to Payment' }).click();
+    await this.page.waitForURL(/\/checkout\/\d+\/[^/]+\/payment/);
   }
 
   async fillStripeCard(card = '4242424242424242'): Promise<void> {

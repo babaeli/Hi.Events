@@ -6,7 +6,6 @@ use HiEvents\Providers\AuthServiceProvider;
 use HiEvents\Providers\EventServiceProvider;
 use HiEvents\Providers\RepositoryServiceProvider;
 use HiEvents\Providers\RouteServiceProvider;
-use HiEvents\Providers\ScrambleServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,13 +21,11 @@ return [
     'saas_mode_enabled' => env('APP_SAAS_MODE_ENABLED', false),
     'saas_stripe_application_fee_percent' => env('APP_SAAS_STRIPE_APPLICATION_FEE_PERCENT', 1.5),
     'saas_stripe_application_fee_fixed' => env('APP_SAAS_STRIPE_APPLICATION_FEE_FIXED', 0),
-    'saas_default_pass_platform_fee_to_buyer' => env('APP_SAAS_DEFAULT_PASS_PLATFORM_FEE_TO_BUYER', true),
+    'saas_default_pass_platform_fee_to_buyer' => env('APP_SAAS_DEFAULT_PASS_PLATFORM_FEE_TO_BUYER', false),
     'disable_registration' => env('APP_DISABLE_REGISTRATION', false),
     'api_rate_limit_per_minute' => env('APP_API_RATE_LIMIT_PER_MINUTE', 180),
     'stripe_connect_account_type' => env('APP_STRIPE_CONNECT_ACCOUNT_TYPE', 'express'),
     'platform_support_email' => env('APP_PLATFORM_SUPPORT_EMAIL', 'support@example.com'),
-    'event_spam_check_enabled' => env('APP_EVENT_SPAM_CHECK_ENABLED', false),
-    'event_spam_check_confidence_threshold' => env('APP_EVENT_SPAM_CHECK_CONFIDENCE_THRESHOLD', 0.7),
     'enforce_email_confirmation_during_registration' => env('APP_ENFORCE_EMAIL_CONFIRMATION_DURING_REGISTRATION', false),
     'allowed_internal_webhook_hosts' => env('APP_ALLOWED_INTERNAL_WEBHOOK_HOSTS', ''),
 
@@ -63,7 +60,6 @@ return [
         'order_details' => '/checkout/%d/%s/details',
         'organizer_order_summary' => '/manage/event/%d/orders#order-%d',
         'ticket_lookup' => '/my-tickets/%s',
-        'account_danger_zone' => '/account/danger-zone',
     ],
 
     /**
@@ -243,7 +239,6 @@ return [
         EventServiceProvider::class,
         RouteServiceProvider::class,
         RepositoryServiceProvider::class,
-        ScrambleServiceProvider::class,
 
     ])->toArray(),
 
@@ -263,6 +258,4 @@ return [
     ])->toArray(),
 
     'is_hi_events' => env('APP_IS_HI_EVENTS', false),
-
-    'api_docs_enabled' => (bool) env('API_DOCS_ENABLED', false),
 ];

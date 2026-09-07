@@ -44,14 +44,6 @@ export interface EventRecord {
   status: EventStatus;
 }
 
-export type EventImageType = 'EVENT_COVER' | 'TICKET_LOGO';
-
-export interface ImageRecord {
-  id: number;
-  url: string;
-  type: EventImageType;
-}
-
 export interface ProductCategory {
   id: number;
   name: string;
@@ -61,7 +53,6 @@ export interface ProductPrice {
   id: number;
   price: number;
   label?: string | null;
-  quantity_sold?: number;
 }
 
 export interface ProductRecord {
@@ -92,14 +83,11 @@ export interface CreateProductPricePayload {
 
 export interface CreateProductPayload {
   title: string;
-  description?: string;
   product_type: ProductKind;
   type: ProductPriceType;
   product_category_id: number;
   prices: CreateProductPricePayload[];
   tax_and_fee_ids?: number[];
-  addon_product_ids?: number[];
-  is_addon_only?: boolean;
   max_per_order?: number;
   min_per_order?: number;
   is_hidden?: boolean;
@@ -184,7 +172,6 @@ export interface UpdateOccurrencePayload {
   start_date: string;
   end_date?: string | null;
   label?: string;
-  capacity?: number | null;
   event_location?:
     | { type: 'IN_PERSON'; location_id: number }
     | { type: 'ONLINE'; online_event_connection_details: string };
@@ -225,13 +212,10 @@ export interface EmailTemplate {
   subject: string;
 }
 
-export type AttendeeDetailsCollection = 'PER_TICKET' | 'PER_ORDER';
-
 export interface EventSettings {
   payment_providers?: string[];
   offline_payment_instructions?: string | null;
   waitlist_enabled?: boolean;
-  attendee_details_collection_method?: AttendeeDetailsCollection;
   [key: string]: unknown;
 }
 

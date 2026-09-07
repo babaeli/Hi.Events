@@ -178,8 +178,8 @@ export const LocationPicker = ({organizerId, value, onChange, error, clearable =
                         </ThemeIcon>
                         <div className={classes.cardText}>
                             <Group gap="xs" wrap="nowrap">
-                                <Text fw={600} truncate className={classes.cardTitle}>{title}</Text>
-                                <Badge size="xs" variant="light" color={isSaved ? 'blue' : 'green'} className={classes.cardBadge}>
+                                <Text fw={600} truncate>{title}</Text>
+                                <Badge size="xs" variant="light" color={isSaved ? 'blue' : 'green'}>
                                     {isSaved ? t`Saved location` : t`New location`}
                                 </Badge>
                             </Group>

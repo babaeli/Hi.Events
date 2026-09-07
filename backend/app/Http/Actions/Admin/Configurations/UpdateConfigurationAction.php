@@ -10,7 +10,6 @@ use HiEvents\Repository\Interfaces\OrganizerConfigurationRepositoryInterface;
 use HiEvents\Resources\Organizer\OrganizerConfigurationResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class UpdateConfigurationAction extends BaseAction
 {
@@ -30,18 +29,6 @@ class UpdateConfigurationAction extends BaseAction
             'application_fees.currency' => 'sometimes|string|size:3|alpha|uppercase',
             'bypass_application_fees' => 'sometimes|boolean',
         ]);
-
-        $existingConfiguration = $this->repository->findById($configurationId);
-        $defaultForCurrency = $existingConfiguration->getDefaultForCurrency();
-        $feeCurrency = $validated['application_fees']['currency'] ?? null;
-
-        if ($defaultForCurrency !== null && $feeCurrency !== null && $feeCurrency !== $defaultForCurrency) {
-            throw ValidationException::withMessages([
-                'application_fees.currency' => __('The fee currency of the :currency default configuration must remain :currency.', [
-                    'currency' => $defaultForCurrency,
-                ]),
-            ]);
-        }
 
         $configuration = $this->repository->updateFromArray(
             id: $configurationId,

@@ -11,11 +11,7 @@ class UpdateEventStatusRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::in([
-                EventStatus::DRAFT->name,
-                EventStatus::LIVE->name,
-                EventStatus::ARCHIVED->name,
-            ])],
+            'status' => ['required', Rule::in(EventStatus::valuesArray())],
         ];
     }
 }

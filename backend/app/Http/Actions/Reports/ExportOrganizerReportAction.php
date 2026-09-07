@@ -9,7 +9,6 @@ use HiEvents\Http\Request\Report\GetOrganizerReportRequest;
 use HiEvents\Services\Application\Handlers\Reports\DTO\GetOrganizerReportDTO;
 use HiEvents\Services\Application\Handlers\Reports\GetOrganizerReportHandler;
 use HiEvents\Services\Domain\Report\DTO\PaginatedReportDTO;
-use HiEvents\Services\Infrastructure\Export\SpreadsheetFormulaEscaper;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -19,10 +18,7 @@ class ExportOrganizerReportAction extends BaseAction
 {
     private const MAX_EXPORT_ROWS = 15000;
 
-    public function __construct(
-        private readonly GetOrganizerReportHandler $reportHandler,
-        private readonly SpreadsheetFormulaEscaper $formulaEscaper,
-    ) {}
+    public function __construct(private readonly GetOrganizerReportHandler $reportHandler) {}
 
     /**
      * @throws ValidationException
@@ -64,7 +60,7 @@ class ExportOrganizerReportAction extends BaseAction
 
             foreach ($data as $row) {
                 $csvRow = $this->formatRowForReportType($row, $reportType);
-                fputcsv($handle, $this->formulaEscaper->escapeRow($csvRow));
+                fputcsv($handle, $csvRow);
             }
 
             fclose($handle);

@@ -140,10 +140,8 @@ class AttendeeTicketMail extends BaseMail
 
     public function attachments(): array
     {
-        $occurrence = $this->occurrence ?? null;
-
-        $startDateRaw = $occurrence?->getStartDate() ?? $this->event->getStartDate();
-        $endDateRaw = $occurrence?->getEndDate() ?? $this->event->getEndDate();
+        $startDateRaw = $this->occurrence?->getStartDate() ?? $this->event->getStartDate();
+        $endDateRaw = $this->occurrence?->getEndDate() ?? $this->event->getEndDate();
 
         $startDateTime = $startDateRaw ? Carbon::parse($startDateRaw, $this->event->getTimezone()) : null;
         $endDateTime = $endDateRaw ? Carbon::parse($endDateRaw, $this->event->getTimezone()) : null;
@@ -153,8 +151,8 @@ class AttendeeTicketMail extends BaseMail
         }
 
         $eventTitle = $this->event->getTitle();
-        if ($occurrence?->getLabel()) {
-            $eventTitle .= ' - '.$occurrence->getLabel();
+        if ($this->occurrence?->getLabel()) {
+            $eventTitle .= ' - '.$this->occurrence->getLabel();
         }
 
         $event = Event::create()

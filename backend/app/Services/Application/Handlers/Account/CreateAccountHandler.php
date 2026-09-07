@@ -19,7 +19,6 @@ use HiEvents\Services\Application\Handlers\Account\DTO\CreateAccountDTO;
 use HiEvents\Services\Application\Handlers\Account\Exceptions\AccountConfigurationDoesNotExist;
 use HiEvents\Services\Application\Handlers\Account\Exceptions\AccountRegistrationDisabledException;
 use HiEvents\Services\Domain\Account\AccountUserAssociationService;
-use HiEvents\Services\Domain\Account\AttributionSourceClassifier;
 use HiEvents\Services\Domain\User\EmailConfirmationService;
 use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseManager;
@@ -41,7 +40,6 @@ class CreateAccountHandler
         private readonly AccountUserRepositoryInterface $accountUserRepository,
         private readonly AccountConfigurationRepositoryInterface $accountConfigurationRepository,
         private readonly AccountAttributionRepositoryInterface $accountAttributionRepository,
-        private readonly AttributionSourceClassifier $attributionSourceClassifier,
         private readonly LoggerInterface $logger,
     ) {}
 
@@ -100,13 +98,7 @@ class CreateAccountHandler
                     'landing_page' => $accountData->landing_page,
                     'gclid' => $accountData->gclid,
                     'fbclid' => $accountData->fbclid,
-                    'source_type' => $this->attributionSourceClassifier->classify(
-                        utmMedium: $accountData->utm_medium,
-                        referrerUrl: $accountData->referrer_url,
-                        gclid: $accountData->gclid,
-                        fbclid: $accountData->fbclid,
-                        utmRaw: $accountData->utm_raw,
-                    )->value,
+                    'source_type' => $this->classifySourceType($accountData),
                     'utm_raw' => $accountData->utm_raw,
                 ]);
             }
@@ -220,12 +212,55 @@ class CreateAccountHandler
         return $data->utm_source !== null
             || $data->utm_medium !== null
             || $data->utm_campaign !== null
-            || $data->fbclid !== null
-            || $this->attributionSourceClassifier->hasPaidClickId($data->gclid, $data->utm_raw);
+            || $data->gclid !== null
+            || $data->fbclid !== null;
+    }
+
+    private function classifySourceType(CreateAccountDTO $data): string
+    {
+        if ($data->gclid !== null) {
+            return 'paid';
+        }
+
+        if ($data->fbclid !== null) {
+            return 'paid';
+        }
+
+        $paidMediums = ['cpc', 'ppc', 'paid', 'paidsocial', 'display', 'retargeting'];
+        $normalizedMedium = $this->normalizeUtmValue($data->utm_medium);
+
+        if ($normalizedMedium !== null && in_array($normalizedMedium, $paidMediums, true)) {
+            return 'paid';
+        }
+
+        if ($data->referrer_url !== null && ! $this->isInternalReferrer($data->referrer_url)) {
+            return 'referral';
+        }
+
+        return 'organic';
+    }
+
+    private function isInternalReferrer(?string $referrer): bool
+    {
+        if ($referrer === null || trim($referrer) === '') {
+            return false;
+        }
+
+        $appUrl = $this->config->get('app.url');
+
+        if ($appUrl === null) {
+            return false;
+        }
+
+        $appHost = parse_url($appUrl, PHP_URL_HOST);
+        $referrerHost = parse_url($referrer, PHP_URL_HOST);
+
+        return $appHost === $referrerHost;
     }
 
     private function getDefaultMessagingTierId(): int
     {
+        // Self-hosted instances get Premium tier, SaaS gets Untrusted
         return $this->config->get('app.is_hi_events') ? 1 : 3;
     }
 }

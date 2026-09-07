@@ -27,7 +27,6 @@ export const EventCard: React.FC<EventCardProps> = ({event, primaryColor = '#8b5
     const emojiIndex = event.id ? Number(event.id) % placeholderEmojis.length : 0;
     const placeholderEmoji = placeholderEmojis[emojiIndex];
 
-    const hasStartDate = !!event.start_date;
     const startMonth = formatDateWithLocale(event.start_date, "monthShort", event.timezone);
     const startDay = formatDateWithLocale(event.start_date, "dayOfMonth", event.timezone);
     const startTime = formatDateWithLocale(event.start_date, "timeOnly", event.timezone);
@@ -58,7 +57,7 @@ export const EventCard: React.FC<EventCardProps> = ({event, primaryColor = '#8b5
     const now = dayjs();
     const startDate = dayjs(event.start_date);
     const endDate = event.end_date ? dayjs(event.end_date) : startDate.add(2, 'hour');
-    const isLive = hasStartDate && now.isAfter(startDate) && now.isBefore(endDate);
+    const isLive = now.isAfter(startDate) && now.isBefore(endDate);
 
     const products = getProductsFromEvent(event) || [];
 
@@ -135,7 +134,7 @@ export const EventCard: React.FC<EventCardProps> = ({event, primaryColor = '#8b5
 
                     <div className={classes.dateBadge}>
                         <IconCalendar size={16}/>
-                        <span>{hasStartDate ? `${startMonth} ${startDay}` : t`Date TBA`}</span>
+                        <span>{startMonth} {startDay}</span>
                     </div>
                 </div>
 
@@ -143,25 +142,23 @@ export const EventCard: React.FC<EventCardProps> = ({event, primaryColor = '#8b5
                     <div className={classes.eventHeader}>
                         <h3 className={classes.eventTitle}>{event.title}</h3>
 
-                        {hasStartDate && (
-                            <div className={classes.eventDateTime}>
-                                <IconClock size={14}/>
-                                <span>
-                                    {startTime}
-                                    {endTime && (
-                                        <>
-                                            {!isSameDay
-                                                ? ` - ${endMonth} ${endDay}, ${endTime}`
-                                                : ` - ${endTime}`
-                                            }
-                                        </>
-                                    )}
-                                    {prettyTimezone && (
-                                        <span title={event.timezone} className={classes.timezone}> ({prettyTimezone})</span>
-                                    )}
-                                </span>
-                            </div>
-                        )}
+                        <div className={classes.eventDateTime}>
+                            <IconClock size={14}/>
+                            <span>
+                                {startTime}
+                                {endTime && (
+                                    <>
+                                        {!isSameDay
+                                            ? ` - ${endMonth} ${endDay}, ${endTime}`
+                                            : ` - ${endTime}`
+                                        }
+                                    </>
+                                )}
+                                {prettyTimezone && (
+                                    <span title={event.timezone} className={classes.timezone}> ({prettyTimezone})</span>
+                                )}
+                            </span>
+                        </div>
                     </div>
 
                     {event.description_preview && (

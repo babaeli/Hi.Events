@@ -119,24 +119,6 @@ export interface Account {
     is_account_email_confirmed?: boolean;
     is_saas_mode_enabled?: boolean;
     requires_manual_verification?: boolean;
-    deletion_request?: AccountDeletionRequest | null;
-}
-
-export interface AccountDeletionRequest {
-    id: IdParam;
-    status: 'REQUESTED' | 'CANCELLED' | 'COMPLETED';
-    initiated_by: 'ACCOUNT_OWNER' | 'ADMIN';
-    expected_outcome: 'HARD_DELETE' | 'ANONYMIZE';
-    scheduled_deletion_at: string;
-    cancelled_at: string | null;
-    requested_at: string;
-}
-
-export interface AccountDeletionStatus {
-    deletion_request: AccountDeletionRequest | null;
-    can_request_deletion: boolean;
-    cannot_delete_reason: string | null;
-    expected_outcome: 'HARD_DELETE' | 'ANONYMIZE';
 }
 
 export interface AccountConfiguration {
@@ -148,7 +130,6 @@ export interface AccountConfiguration {
         currency: string;
     },
     is_system_default: boolean;
-    default_for_currency: string | null;
 }
 
 export interface OrganizerStripeConnectDetails {
@@ -227,7 +208,6 @@ export interface EventSettings {
     event_id?: IdParam;
     id?: IdParam;
     continue_button_text: string;
-    get_tickets_button_text?: string;
     email_footer_message: string;
     pre_checkout_message: string;
     product_page_message: string;
@@ -378,8 +358,7 @@ export enum EventStatus {
     DRAFT = 'DRAFT',
     LIVE = 'LIVE',
     PAUSED = 'PAUSED',
-    ARCHIVED = 'ARCHIVED',
-    PENDING_MANUAL_REVIEW = 'PENDING_MANUAL_REVIEW'
+    ARCHIVED = 'ARCHIVED'
 }
 
 export enum OrganizerStatus {
@@ -588,11 +567,6 @@ export interface EventDailyStats {
 export interface CheckInStats {
     total_checked_in_attendees: number;
     total_attendees: number;
-}
-
-export interface EventCounts {
-    total_orders: number;
-    total_attendees_registered: number;
 }
 
 export interface EventStats {
@@ -811,9 +785,6 @@ export interface Product {
     waitlist_enabled?: boolean | null;
     has_waiting_entries?: boolean;
     waitlist_entry_count?: number;
-    addon_product_ids?: IdParam[];
-    is_addon_only?: boolean;
-    addons?: Array<{ id: number; title: string }>;
 }
 
 export interface ProductCategory {

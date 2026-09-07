@@ -6,7 +6,6 @@ namespace HiEvents\Providers;
 
 use HiEvents\Repository\Eloquent\AccountAttributionRepository;
 use HiEvents\Repository\Eloquent\AccountConfigurationRepository;
-use HiEvents\Repository\Eloquent\AccountDeletionRequestRepository;
 use HiEvents\Repository\Eloquent\AccountMessagingTierRepository;
 use HiEvents\Repository\Eloquent\AccountRepository;
 use HiEvents\Repository\Eloquent\AccountUserRepository;
@@ -25,7 +24,6 @@ use HiEvents\Repository\Eloquent\EventOccurrenceRepository;
 use HiEvents\Repository\Eloquent\EventOccurrenceStatisticRepository;
 use HiEvents\Repository\Eloquent\EventRepository;
 use HiEvents\Repository\Eloquent\EventSettingsRepository;
-use HiEvents\Repository\Eloquent\EventSpamCheckRepository;
 use HiEvents\Repository\Eloquent\EventStatisticRepository;
 use HiEvents\Repository\Eloquent\ImageRepository;
 use HiEvents\Repository\Eloquent\InvoiceRepository;
@@ -65,7 +63,6 @@ use HiEvents\Repository\Eloquent\WebhookLogRepository;
 use HiEvents\Repository\Eloquent\WebhookRepository;
 use HiEvents\Repository\Interfaces\AccountAttributionRepositoryInterface;
 use HiEvents\Repository\Interfaces\AccountConfigurationRepositoryInterface;
-use HiEvents\Repository\Interfaces\AccountDeletionRequestRepositoryInterface;
 use HiEvents\Repository\Interfaces\AccountMessagingTierRepositoryInterface;
 use HiEvents\Repository\Interfaces\AccountRepositoryInterface;
 use HiEvents\Repository\Interfaces\AccountUserRepositoryInterface;
@@ -84,7 +81,6 @@ use HiEvents\Repository\Interfaces\EventOccurrenceRepositoryInterface;
 use HiEvents\Repository\Interfaces\EventOccurrenceStatisticRepositoryInterface;
 use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use HiEvents\Repository\Interfaces\EventSettingsRepositoryInterface;
-use HiEvents\Repository\Interfaces\EventSpamCheckRepositoryInterface;
 use HiEvents\Repository\Interfaces\EventStatisticRepositoryInterface;
 use HiEvents\Repository\Interfaces\ImageRepositoryInterface;
 use HiEvents\Repository\Interfaces\InvoiceRepositoryInterface;
@@ -133,7 +129,6 @@ class RepositoryServiceProvider extends ServiceProvider
         UserRepositoryInterface::class => UserRepository::class,
         AccountRepositoryInterface::class => AccountRepository::class,
         AccountAttributionRepositoryInterface::class => AccountAttributionRepository::class,
-        AccountDeletionRequestRepositoryInterface::class => AccountDeletionRequestRepository::class,
         EventRepositoryInterface::class => EventRepository::class,
         ProductRepositoryInterface::class => ProductRepository::class,
         OrderRepositoryInterface::class => OrderRepository::class,
@@ -151,7 +146,6 @@ class RepositoryServiceProvider extends ServiceProvider
         ImageRepositoryInterface::class => ImageRepository::class,
         ProductPriceRepositoryInterface::class => ProductPriceRepository::class,
         EventStatisticRepositoryInterface::class => EventStatisticRepository::class,
-        EventSpamCheckRepositoryInterface::class => EventSpamCheckRepository::class,
         EventDailyStatisticRepositoryInterface::class => EventDailyStatisticRepository::class,
         EventSettingsRepositoryInterface::class => EventSettingsRepository::class,
         OrganizerRepositoryInterface::class => OrganizerRepository::class,

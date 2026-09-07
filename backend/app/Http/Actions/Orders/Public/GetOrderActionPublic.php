@@ -2,7 +2,6 @@
 
 namespace HiEvents\Http\Actions\Orders\Public;
 
-use Dedoc\Scramble\Attributes\QueryParameter;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Resources\Order\OrderResourcePublic;
 use HiEvents\Services\Application\Handlers\Order\DTO\GetOrderPublicDTO;
@@ -18,7 +17,6 @@ class GetOrderActionPublic extends BaseAction
         private readonly CheckoutSessionManagementService $sessionService,
     ) {}
 
-    #[QueryParameter('session_identifier', description: 'Checkout session identifier issued when the order was created. Sets the checkout session cookie on the response.', type: 'string')]
     public function __invoke(int $eventId, string $orderShortId, Request $request): JsonResponse
     {
         $order = $this->getOrderPublicHandler->handle(new GetOrderPublicDTO(

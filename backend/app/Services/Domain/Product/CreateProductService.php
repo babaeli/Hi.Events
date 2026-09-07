@@ -23,7 +23,6 @@ class CreateProductService
         private readonly ProductRepositoryInterface $productRepository,
         private readonly DatabaseManager $databaseManager,
         private readonly TaxAndProductAssociationService $taxAndProductAssociationService,
-        private readonly ProductAddonAssociationService $productAddonAssociationService,
         private readonly ProductPriceCreateService $priceCreateService,
         private readonly HtmlPurifierService $purifier,
         private readonly EventRepositoryInterface $eventRepository,
@@ -38,21 +37,12 @@ class CreateProductService
         ProductDomainObject $product,
         int $accountId,
         ?array $taxAndFeeIds = null,
-        ?array $addonProductIds = null,
     ): ProductDomainObject {
-        return $this->databaseManager->transaction(function () use ($accountId, $taxAndFeeIds, $addonProductIds, $product) {
+        return $this->databaseManager->transaction(function () use ($accountId, $taxAndFeeIds, $product) {
             $persistedProduct = $this->persistProduct($product);
 
             if ($taxAndFeeIds) {
                 $this->associateTaxesAndFees($persistedProduct, $taxAndFeeIds, $accountId);
-            }
-
-            if ($addonProductIds !== null) {
-                $this->productAddonAssociationService->associateAddons(
-                    productId: $persistedProduct->getId(),
-                    eventId: $persistedProduct->getEventId(),
-                    addonProductIds: $addonProductIds,
-                );
             }
 
             $product = $this->createProductPrices($persistedProduct, $product);
@@ -101,7 +91,6 @@ class CreateProductService
             'is_highlighted' => $productsData->getIsHighlighted(),
             'highlight_message' => $productsData->getHighlightMessage(),
             'waitlist_enabled' => $productsData->getWaitlistEnabled(),
-            'is_addon_only' => $productsData->getIsAddonOnly(),
         ]);
     }
 

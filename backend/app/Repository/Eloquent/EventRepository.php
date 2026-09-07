@@ -12,14 +12,12 @@ use HiEvents\DomainObjects\Generated\EventDomainObjectAbstract;
 use HiEvents\DomainObjects\Generated\EventSettingDomainObjectAbstract;
 use HiEvents\DomainObjects\OrganizerDomainObject;
 use HiEvents\DomainObjects\Status\EventStatus;
-use HiEvents\DomainObjects\Status\OrderStatus;
 use HiEvents\Http\DTO\QueryParamsDTO;
 use HiEvents\Models\Event;
 use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -44,7 +42,6 @@ class EventRepository extends BaseRepository implements EventRepositoryInterface
                 ->whereIn(EventDomainObjectAbstract::STATUS, [
                     EventStatus::LIVE->name,
                     EventStatus::DRAFT->name,
-                    EventStatus::PENDING_MANUAL_REVIEW->name,
                 ])
                 ->where(EventDomainObjectAbstract::ORGANIZER_ID, $organizerId)
                 ->where(EventDomainObjectAbstract::ACCOUNT_ID, $accountId);
@@ -112,39 +109,16 @@ class EventRepository extends BaseRepository implements EventRepositoryInterface
             };
         }
 
-        $sortColumn = $this->validateSortColumn($params->sort_by, EventDomainObject::class);
-        $sortDirection = $this->validateSortDirection($params->sort_direction, EventDomainObject::class);
-
-        if ($sortColumn === EventDomainObjectAbstract::START_DATE) {
-            $this->applyOccurrenceStartDateSort($sortDirection, $upcomingEventsFilter, $endedEventsFilter);
-        } else {
-            $this->model = $this->model->orderBy($sortColumn, $sortDirection);
-        }
+        $this->model = $this->model->orderBy(
+            $this->validateSortColumn($params->sort_by, EventDomainObject::class),
+            $this->validateSortDirection($params->sort_direction, EventDomainObject::class),
+        );
 
         return $this->paginateWhere(
             where: $where,
             limit: $params->per_page,
             page: $params->page,
         );
-    }
-
-    private function applyOccurrenceStartDateSort(string $direction, bool $upcomingOnly, bool $endedOnly): void
-    {
-        $liveOccurrences = 'FROM event_occurrences eo WHERE eo.event_id = events.id AND eo.deleted_at IS NULL';
-        $bindings = [];
-
-        if ($upcomingOnly) {
-            $sortDateSql = "SELECT MIN(eo.start_date) {$liveOccurrences} AND COALESCE(eo.end_date, eo.start_date) >= ?";
-            $bindings[] = now();
-        } elseif ($endedOnly) {
-            $sortDateSql = "SELECT MAX(eo.start_date) {$liveOccurrences}";
-        } else {
-            $sortDateSql = "SELECT MIN(eo.start_date) {$liveOccurrences}";
-        }
-
-        $this->model = $this->model
-            ->orderByRaw("({$sortDateSql}) {$direction} NULLS LAST", $bindings)
-            ->orderBy(EventDomainObjectAbstract::ID);
     }
 
     public function getUpcomingEventsForAdmin(int $perPage): LengthAwarePaginator
@@ -253,30 +227,5 @@ class EventRepository extends BaseRepository implements EventRepositoryInterface
             ->where('event_settings.'.EventSettingDomainObjectAbstract::ALLOW_SEARCH_ENGINE_INDEXING, true)
             ->whereNull('events.'.EventDomainObjectAbstract::DELETED_AT)
             ->count();
-    }
-
-    public function getUpcomingEventsWithCompletedOrders(int $accountId): Collection
-    {
-        return $this->runQuery(function () use ($accountId) {
-            $events = $this->model
-                ->where('events.'.EventDomainObjectAbstract::ACCOUNT_ID, $accountId)
-                ->whereExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('event_occurrences')
-                        ->whereColumn('event_occurrences.event_id', 'events.id')
-                        ->whereNull('event_occurrences.deleted_at')
-                        ->whereRaw('COALESCE(event_occurrences.end_date, event_occurrences.start_date) >= ?', [now()]);
-                })
-                ->whereExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('orders')
-                        ->whereColumn('orders.event_id', 'events.id')
-                        ->whereNull('orders.deleted_at')
-                        ->where('orders.status', OrderStatus::COMPLETED->name);
-                })
-                ->get();
-
-            return $this->handleResults($events);
-        });
     }
 }

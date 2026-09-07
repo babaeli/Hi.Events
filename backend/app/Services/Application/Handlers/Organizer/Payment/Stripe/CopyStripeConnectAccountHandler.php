@@ -11,7 +11,6 @@ use HiEvents\Repository\Interfaces\OrganizerRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrganizerStripePlatformRepositoryInterface;
 use HiEvents\Services\Application\Handlers\Organizer\Payment\Stripe\DTO\CopyStripeConnectAccountDTO;
 use HiEvents\Services\Application\Handlers\Organizer\Payment\Stripe\DTO\CreateStripeConnectAccountResponse;
-use HiEvents\Services\Domain\Organizer\AssignCurrencyDefaultOrganizerConfigurationService;
 use HiEvents\Services\Domain\Payment\Stripe\StripeAccountSyncService;
 use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseManager;
@@ -23,7 +22,6 @@ class CopyStripeConnectAccountHandler
         private readonly OrganizerRepositoryInterface $organizerRepository,
         private readonly OrganizerStripePlatformRepositoryInterface $organizerStripePlatformRepository,
         private readonly StripeAccountSyncService $stripeAccountSyncService,
-        private readonly AssignCurrencyDefaultOrganizerConfigurationService $assignCurrencyDefaultOrganizerConfigurationService,
         private readonly DatabaseManager $databaseManager,
         private readonly Repository $config,
     ) {}
@@ -114,11 +112,6 @@ class CopyStripeConnectAccountHandler
             organizerId: (int) $target->getId(),
             countryCode: $sourceDetails['country'] ?? null,
             stripeAccountId: $sourcePlatform->getStripeAccountId(),
-        );
-
-        $this->assignCurrencyDefaultOrganizerConfigurationService->assignForCountry(
-            organizerId: (int) $target->getId(),
-            countryCode: $sourceDetails['country'] ?? null,
         );
 
         return new CreateStripeConnectAccountResponse(

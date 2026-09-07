@@ -1,0 +1,155 @@
+════════════════════════════════════════════════════════════════
+🧪 QUICK TESTING REFERENCE
+════════════════════════════════════════════════════════════════
+
+✅ DATABASE CLEARED - Ready for fresh testing!
+
+════════════════════════════════════════════════════════════════
+📝 STEP-BY-STEP TESTING
+════════════════════════════════════════════════════════════════
+
+STEP 1️⃣: CREATE 3 EVENTS AS ORGANIZER
+────────────────────────────────────────────────────────────────
+1. Login: http://localhost:8123/auth/login
+   📧 Email: organizer@test.com
+   🔑 Password: User123456
+
+2. Click "Create Event"
+
+3. Create These 3 Events:
+   
+   EVENT #1: Summer Music Festival 2026
+   └─ Tickets: General Admission ($50), VIP Pass ($150)
+   
+   EVENT #2: Tech Innovation Summit 2026
+   └─ Tickets: Early Bird ($199), Regular ($299)
+   
+   EVENT #3: Annual Charity Gala 2026
+   └─ Tickets: Individual Seat ($250), Table of 10 ($2000)
+
+4. Make sure to set status to "Published" for each!
+
+────────────────────────────────────────────────────────────────
+
+STEP 2️⃣: VIEW AS ORGANIZER
+────────────────────────────────────────────────────────────────
+While logged in as organizer@test.com:
+
+✅ You WILL see:
+   - Your 3 events
+   - Your event statistics
+   - Your revenue (will be $0)
+   - Event management tools
+
+❌ You CANNOT see:
+   - /admin dashboard
+   - Other organizers' events
+   - Platform-wide stats
+
+────────────────────────────────────────────────────────────────
+
+STEP 3️⃣: VIEW AS SUPER ADMIN
+────────────────────────────────────────────────────────────────
+1. Logout → Login with:
+   📧 Email: admin@hievents.com
+   🔑 Password: SuperAdmin2024
+
+2. Go to: http://localhost:8123/admin
+
+✅ You WILL see:
+   - ALL accounts (Platform Admin + Event Organizer Co)
+   - ALL 3 events from Event Organizer Co
+   - Platform statistics
+   - Total: 2 accounts, 3 events, $0 revenue
+
+3. Click "Accounts" → "Event Organizer Co"
+   - See all their events
+   - See account details
+   - Click "Impersonate" button
+
+────────────────────────────────────────────────────────────────
+
+STEP 4️⃣: TEST IMPERSONATION
+────────────────────────────────────────────────────────────────
+While impersonating:
+   - You see what the organizer sees
+   - Banner shows "You are impersonating..."
+   - Can edit their events
+   - Can create events as them
+   - Click "Stop Impersonating" to return
+
+────────────────────────────────────────────────────────────────
+
+STEP 5️⃣: CREATE 2ND ORGANIZER (OPTIONAL)
+────────────────────────────────────────────────────────────────
+1. Logout → Register new account:
+   http://localhost:8123/auth/register
+   
+   📧 Email: organizer2@test.com
+   🔑 Password: User123456
+   👤 Name: Sarah Producer
+   🏢 Company: Music Venue LLC
+
+2. Create 1-2 events as this new organizer
+
+3. Test data isolation:
+   - Login as organizer@test.com → See only 3 events
+   - Login as organizer2@test.com → See only their events
+   - Login as admin@hievents.com → See ALL events
+
+════════════════════════════════════════════════════════════════
+🔑 LOGIN CREDENTIALS
+════════════════════════════════════════════════════════════════
+
+👑 SUPER ADMIN (Platform Owner)
+   📧 admin@hievents.com
+   🔑 SuperAdmin2024
+   🌐 After login: http://localhost:8123/admin
+
+👥 EVENT ORGANIZER (Normal User)
+   📧 organizer@test.com
+   🔑 User123456
+   🌐 After login: http://localhost:8123/manage/events
+
+🔐 Login URL: http://localhost:8123/auth/login
+
+════════════════════════════════════════════════════════════════
+📊 WHAT TO OBSERVE
+════════════════════════════════════════════════════════════════
+
+KEY DIFFERENCES:
+
+Organizer View                    Super Admin View
+─────────────────────────────────────────────────────────────
+✓ See only OWN events            ✓ See ALL events
+✓ See own revenue                ✓ See platform revenue
+✗ Cannot access /admin           ✓ Can access /admin
+✗ Cannot see other organizers    ✓ See all organizers
+✗ Cannot impersonate             ✓ Can impersonate anyone
+
+════════════════════════════════════════════════════════════════
+🎯 SUCCESS CRITERIA
+════════════════════════════════════════════════════════════════
+
+✅ Created 3 events as organizer
+✅ Can view/edit own events
+✅ Super Admin sees all 3 events in /admin
+✅ Super Admin can view organizer's account
+✅ Impersonation works correctly
+✅ Data separation confirmed (if testing with 2nd organizer)
+
+════════════════════════════════════════════════════════════════
+💡 TIPS
+════════════════════════════════════════════════════════════════
+
+- Always check which account you're logged in with
+- Organizers see /manage/events, Super Admin sees /admin
+- Make events "Published" or they won't show up
+- Use different browser or incognito mode for multiple logins
+- Refresh page if dashboard doesn't update immediately
+
+════════════════════════════════════════════════════════════════
+
+📖 For detailed guide, see: TESTING_GUIDE.md
+
+════════════════════════════════════════════════════════════════

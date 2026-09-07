@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace HiEvents\Http\Actions\Locations;
 
-use Dedoc\Scramble\Attributes\QueryParameter;
 use HiEvents\DomainObjects\OrganizerDomainObject;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Http\ResponseCodes;
@@ -23,9 +22,6 @@ class GeoAutocompleteAction extends BaseAction
         private readonly GeoAutocompleteHandler $handler,
     ) {}
 
-    #[QueryParameter('query', description: 'Address search term.', type: 'string', required: true)]
-    #[QueryParameter('locale', description: 'Locale for the returned suggestions.', type: 'string')]
-    #[QueryParameter('country', description: 'Two-letter country code used to bias the results.', type: 'string')]
     public function __invoke(int $organizerId, Request $request): JsonResponse
     {
         $this->isActionAuthorized($organizerId, OrganizerDomainObject::class);

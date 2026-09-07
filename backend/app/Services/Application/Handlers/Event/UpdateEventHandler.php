@@ -9,20 +9,18 @@ use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\DomainObjects\EventLocationDomainObject;
 use HiEvents\DomainObjects\EventOccurrenceDomainObject;
 use HiEvents\DomainObjects\LocationDomainObject;
-use HiEvents\DomainObjects\Status\EventStatus;
+use HiEvents\DomainObjects\Status\OrderStatus;
 use HiEvents\Events\Dispatcher;
 use HiEvents\Events\EventUpdateEvent;
 use HiEvents\Exceptions\CannotChangeCurrencyException;
 use HiEvents\Helper\DateHelper;
 use HiEvents\Helper\StringHelper;
-use HiEvents\Jobs\Event\EventSpamCheckJob;
 use HiEvents\Jobs\Event\Webhook\DispatchEventWebhookJob;
 use HiEvents\Repository\Eloquent\Value\Relationship;
 use HiEvents\Repository\Interfaces\EventOccurrenceRepositoryInterface;
 use HiEvents\Repository\Interfaces\EventRepositoryInterface;
 use HiEvents\Repository\Interfaces\OrderRepositoryInterface;
 use HiEvents\Services\Application\Handlers\Event\DTO\UpdateEventDTO;
-use HiEvents\Services\Domain\Event\EventSpamCheckService;
 use HiEvents\Services\Infrastructure\DomainEvents\Enums\DomainEventType;
 use HiEvents\Services\Infrastructure\HtmlPurifier\HtmlPurifierService;
 use Illuminate\Database\DatabaseManager;
@@ -38,7 +36,6 @@ readonly class UpdateEventHandler
         private OrderRepositoryInterface $orderRepository,
         private HtmlPurifierService $purifier,
         private EventOccurrenceRepositoryInterface $occurrenceRepository,
-        private EventSpamCheckService $eventSpamCheckService,
     ) {}
 
     /**
@@ -69,19 +66,14 @@ readonly class UpdateEventHandler
             );
         }
 
-        $isCurrencyChanging = $eventData->currency !== null && $eventData->currency !== $existingEvent->getCurrency();
-
-        if ($isCurrencyChanging) {
-            $this->databaseManager->statement('SELECT pg_advisory_xact_lock(?)', [$eventData->id]);
-            $this->guardCurrencyChange($eventData);
+        if ($eventData->currency !== null && $eventData->currency !== $existingEvent->getCurrency()) {
+            $this->checkForCompletedOrders($eventData);
         }
 
         $attributes = [
             'title' => StringHelper::stripControlCharacters($eventData->title),
             'category' => $eventData->category?->value ?? $existingEvent->getCategory(),
-            'description' => $eventData->description_provided
-                ? $this->purifier->purify($eventData->description)
-                : $existingEvent->getDescription(),
+            'description' => $this->purifier->purify($eventData->description),
             'timezone' => $eventData->timezone ?? $existingEvent->getTimezone(),
             'currency' => $eventData->currency ?? $existingEvent->getCurrency(),
         ];
@@ -94,38 +86,7 @@ readonly class UpdateEventHandler
             ],
         );
 
-        if ($isCurrencyChanging) {
-            $this->orderRepository->updateWhere(
-                attributes: ['currency' => $eventData->currency],
-                where: [
-                    'event_id' => $eventData->id,
-                    ['total_gross', '=', 0],
-                ],
-            );
-        }
-
         $this->updateSingleOccurrenceDates($eventData, $existingEvent);
-
-        $this->dispatchSpamCheckIfContentChanged($existingEvent, $attributes);
-    }
-
-    private function dispatchSpamCheckIfContentChanged(EventDomainObject $existingEvent, array $attributes): void
-    {
-        if ($existingEvent->getStatus() !== EventStatus::LIVE->name) {
-            return;
-        }
-
-        $contentChanged = $attributes['title'] !== $existingEvent->getTitle()
-            || $attributes['description'] !== $existingEvent->getDescription();
-
-        if (! $contentChanged || ! $this->eventSpamCheckService->isEnabled()) {
-            return;
-        }
-
-        EventSpamCheckJob::dispatch(
-            $existingEvent->getId(),
-            $this->eventSpamCheckService->hashContent($attributes['title'], $attributes['description']),
-        )->afterCommit();
     }
 
     private function updateSingleOccurrenceDates(UpdateEventDTO $eventData, EventDomainObject $existingEvent): void
@@ -190,16 +151,16 @@ readonly class UpdateEventHandler
     /**
      * @throws CannotChangeCurrencyException
      */
-    private function guardCurrencyChange(UpdateEventDTO $eventData): void
+    private function checkForCompletedOrders(UpdateEventDTO $eventData): void
     {
-        $paidOrder = $this->orderRepository->findFirstWhere([
+        $orders = $this->orderRepository->findWhere([
             'event_id' => $eventData->id,
-            ['total_gross', '>', 0],
+            'status' => OrderStatus::COMPLETED->name,
         ]);
 
-        if ($paidOrder !== null) {
+        if ($orders->isNotEmpty()) {
             throw new CannotChangeCurrencyException(
-                __('You cannot change the currency of an event that has paid orders. To use a different currency, duplicate the event and change the currency on the new event.'),
+                __('You cannot change the currency of an event that has completed orders'),
             );
         }
     }

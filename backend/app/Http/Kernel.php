@@ -4,7 +4,6 @@ namespace HiEvents\Http;
 
 use HiEvents\Http\Middleware\Authenticate;
 use HiEvents\Http\Middleware\EncryptCookies;
-use HiEvents\Http\Middleware\EnsureAccountIsNotPendingDeletion;
 use HiEvents\Http\Middleware\HandleDeprecatedTimezones;
 use HiEvents\Http\Middleware\LogImpersonationMiddleware;
 use HiEvents\Http\Middleware\PreventRequestForgery;
@@ -14,6 +13,7 @@ use HiEvents\Http\Middleware\SetAccountContext;
 use HiEvents\Http\Middleware\SetUserLocaleMiddleware;
 use HiEvents\Http\Middleware\TrimStrings;
 use HiEvents\Http\Middleware\TrustProxies;
+use HiEvents\Http\Middleware\ValidateSignature;
 use HiEvents\Http\Middleware\VaporBinaryResponseMiddleware;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
 use Illuminate\Auth\Middleware\Authorize;
@@ -71,7 +71,6 @@ class Kernel extends HttpKernel
             ThrottleRequests::class.':api',
             SubstituteBindings::class,
             SetAccountContext::class,
-            EnsureAccountIsNotPendingDeletion::class,
             SetUserLocaleMiddleware::class,
             LogImpersonationMiddleware::class,
         ],
@@ -92,6 +91,7 @@ class Kernel extends HttpKernel
         'can' => Authorize::class,
         'guest' => RedirectIfAuthenticated::class,
         'password.confirm' => RequirePassword::class,
+        'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
         'verified' => EnsureEmailIsVerified::class,
     ];

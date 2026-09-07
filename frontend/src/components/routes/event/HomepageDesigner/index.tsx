@@ -26,7 +26,6 @@ import {DEFAULT_HOMEPAGE_FONT} from "../../../../constants/homepageFonts.ts";
 interface FormValues {
     homepage_theme_settings: Partial<HomepageThemeSettings>;
     continue_button_text: string;
-    get_tickets_button_text: string;
 }
 
 const HomepageDesigner = () => {
@@ -55,7 +54,6 @@ const HomepageDesigner = () => {
                 font_family: DEFAULT_HOMEPAGE_FONT,
             },
             continue_button_text: '',
-            get_tickets_button_text: '',
         }
     });
 
@@ -69,7 +67,6 @@ const HomepageDesigner = () => {
             form.setValues({
                 homepage_theme_settings: themeSettings,
                 continue_button_text: settings.continue_button_text,
-                get_tickets_button_text: settings.get_tickets_button_text || '',
             });
         }
     }, [eventSettingsQuery.isFetched]);
@@ -94,7 +91,6 @@ const HomepageDesigner = () => {
         const eventSettings: Partial<EventSettings> = {
             homepage_theme_settings: validatedTheme,
             continue_button_text: values.continue_button_text,
-            get_tickets_button_text: values.get_tickets_button_text,
             // Also update legacy fields for backward compatibility during transition
             homepage_primary_color: validatedTheme.accent,
             homepage_body_background_color: validatedTheme.background,
@@ -130,7 +126,6 @@ const HomepageDesigner = () => {
             const settingsToSend = {
                 homepage_theme_settings: themeSettings,
                 continue_button_text: form.values.continue_button_text,
-                get_tickets_button_text: form.values.get_tickets_button_text,
             };
 
             const settingsJson = JSON.stringify(settingsToSend);
@@ -280,13 +275,6 @@ const HomepageDesigner = () => {
                                                 placeholder={t`e.g., Get Tickets, Register Now`}
                                                 size="sm"
                                                 {...form.getInputProps('continue_button_text')}
-                                            />
-                                            <TextInput
-                                                label={t`Get Tickets Button Text`}
-                                                description={t`Customize the text shown on the floating button that scrolls to the tickets section`}
-                                                placeholder={t`Get Tickets`}
-                                                size="sm"
-                                                {...form.getInputProps('get_tickets_button_text')}
                                             />
                                         </Stack>
                                     </fieldset>

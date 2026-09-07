@@ -1,15 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
 
-export type ProductLedgerRow =
-  | 'description'
-  | 'sale-window'
-  | 'event-page'
-  | 'taxes'
-  | 'order-limits'
-  | 'addons'
-  | 'highlight'
-  | 'access';
-
 export class ProductCreatePage {
   constructor(private readonly page: Page) {}
 
@@ -24,11 +14,12 @@ export class ProductCreatePage {
     await this.page.getByRole('heading', { name: 'Create Ticket or Product' }).waitFor();
   }
 
-  async selectPriceType(segmentLabel: string): Promise<void> {
+  async selectPriceType(optionName: RegExp): Promise<void> {
     await this.page
-      .getByTestId('product-price-type')
-      .getByText(segmentLabel, { exact: true })
+      .getByLabel('Create Ticket or Product')
+      .getByText('Paid Product', { exact: true })
       .click();
+    await this.page.getByRole('option', { name: optionName }).click();
   }
 
   async fillTier(index: number, price: string, label: string): Promise<void> {
@@ -40,8 +31,8 @@ export class ProductCreatePage {
     await this.page.getByTestId('product-add-tier-button').click();
   }
 
-  async openLedgerRow(row: ProductLedgerRow): Promise<void> {
-    await this.page.getByTestId(`product-ledger-${row}`).click();
+  async openAdvancedOptions(): Promise<void> {
+    await this.page.getByRole('button', { name: /Taxes, Fees, Visibility/ }).click();
   }
 
   hiddenSwitch(): Locator {
@@ -49,22 +40,12 @@ export class ProductCreatePage {
   }
 
   async submitCreate(): Promise<void> {
-    await this.page.getByTestId('product-create-submit-button').click();
+    await this.page.getByRole('button', { name: 'Create Product' }).click();
   }
 
-  async openEditModal(index = 0): Promise<void> {
-    await this.page.getByTestId('product-manage-button').nth(index).click();
+  async openEditModal(): Promise<void> {
+    await this.page.getByTestId('product-manage-button').click();
     await this.page.getByTestId('product-edit-menu-item').click();
     await this.page.getByRole('heading', { name: 'Edit Product' }).waitFor();
-  }
-
-  addonOnlySwitch(): Locator {
-    return this.page.getByLabel('Only available as an add-on');
-  }
-
-  async selectAddonProduct(productTitle: string): Promise<void> {
-    await this.page.getByRole('combobox', { name: 'Add-on products' }).click();
-    await this.page.getByRole('option', { name: productTitle }).click();
-    await this.page.keyboard.press('Escape');
   }
 }

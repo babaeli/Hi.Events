@@ -1,8 +1,6 @@
 services:
   all-in-one:
-    build:
-      context: ./../../
-      dockerfile: Dockerfile.all-in-one
+    image: daveearley/hi.events-all-in-one:latest
     restart: unless-stopped
     ports:
       - "8123:80"
@@ -47,6 +45,9 @@ services:
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - WEBHOOK_QUEUE_NAME=webhook-queue
+    volumes:
+      - ../../backend/app/Console/Commands:/app/backend/app/Console/Commands:ro
+      - ../../docs:/app/docs:ro
 
     depends_on:
       postgres:

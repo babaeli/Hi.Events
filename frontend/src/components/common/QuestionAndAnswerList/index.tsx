@@ -1,13 +1,19 @@
 import {IdParam, QuestionAnswer} from "../../../types.ts";
 import {ActionIcon, Button, Group, Text, Tooltip} from '@mantine/core';
 import {t} from "@lingui/macro";
-import {IconEdit, IconExternalLink, IconUser} from "@tabler/icons-react";
+import {
+    IconEdit,
+    IconExternalLink,
+    IconPackage,
+    IconShoppingCart,
+    IconUser
+} from "@tabler/icons-react";
 import {NavLink, useParams} from "react-router";
 import classes from './QuestionAndAnswerList.module.scss';
 import {useEditQuestionAnswer} from "../../../mutations/useEditQuestionAnswer.ts";
 import {QuestionInput} from "../CheckoutQuestion";
 import {useForm} from "@mantine/form";
-import {ReactNode, useState} from "react";
+import {useState} from "react";
 import {showError, showSuccess} from "../../../utilites/notifications.tsx";
 import {formatAnswer} from "../../../utilites/questionHelper.ts";
 import {useFormErrorResponseHandler} from "../../../hooks/useFormErrorResponseHandler.tsx";
@@ -21,7 +27,13 @@ interface QuestionAndAnswerListProps {
 interface QuestionListProps {
     questions: QuestionAnswer[];
     onEditAnswer?: () => void;
-    hideProductTitle?: boolean;
+    compact?: boolean;
+}
+
+interface AttendeeQuestionsListProps {
+    attendeeQuestions: QuestionAnswer[];
+    onEditAnswer?: () => void;
+    compact?: boolean;
 }
 
 interface QuestionItemProps {
@@ -29,42 +41,51 @@ interface QuestionItemProps {
     isEditing: boolean;
     toggleEditMode: (id: IdParam) => void;
     onEditAnswer?: () => void;
+    compact?: boolean;
     eventId?: string;
-    hideProductTitle: boolean;
+    hideAttendeeInfo?: boolean;
 }
 
-const useEditingQuestions = () => {
-    const [editingQuestionIds, setEditingQuestionIds] = useState<IdParam[]>([]);
-
-    const toggleEditMode = (questionId: IdParam) => {
-        setEditingQuestionIds(prev =>
-            prev.includes(questionId)
-                ? prev.filter(id => id !== questionId)
-                : [...prev, questionId]
-        );
-    };
-
-    const isEditing = (questionId: IdParam) => editingQuestionIds.includes(questionId);
-
-    return {toggleEditMode, isEditing};
-};
-
-const QuestionItem = ({qa, isEditing, toggleEditMode, onEditAnswer, eventId, hideProductTitle}: QuestionItemProps) => {
+// Separated QuestionItem component to isolate form initialization
+const QuestionItem = ({ qa, isEditing, toggleEditMode, onEditAnswer, compact = false, eventId, hideAttendeeInfo = false }: QuestionItemProps) => {
     const errorHandler = useFormErrorResponseHandler();
     const updateAnswerMutation = useEditQuestionAnswer();
 
+    // Form initialization is now isolated in this component
+    const initialValues = qa.question_type === 'ADDRESS' ? {
+        answer: qa.answer,
+    } : {
+        answer: {
+            answer: qa.answer,
+        },
+    };
+
     const questionForm = useForm({
-        initialValues: qa.question_type === 'ADDRESS'
-            ? {answer: qa.answer}
-            : {answer: {answer: qa.answer}},
-        transformValues: (values) => ({
-            answer: qa.question_type !== 'ADDRESS' && values.answer && typeof values.answer === 'object' && 'answer' in values.answer
-                ? values.answer.answer
-                : values.answer,
-        }),
+        initialValues: initialValues,
+        transformValues: (values) => {
+            // Make sure we're handling the transformation consistently
+            // For ADDRESS type, just pass the answer directly
+            // For other types, extract the nested answer value
+            // Also add null/undefined checks
+            let transformedAnswer;
+            if (qa.question_type === 'ADDRESS') {
+                transformedAnswer = values.answer;
+            } else {
+                // Handle both possible structures to be safe
+                transformedAnswer = values.answer && typeof values.answer === 'object' && 'answer' in values.answer
+                    ? values.answer.answer
+                    : values.answer;
+            }
+
+            return {
+                answer: transformedAnswer
+            };
+        },
     });
 
     const handleSubmit = (values: { answer: any }) => {
+        // Don't transform the answer - the form's transformValues has already done this
+        // The values parameter here is already the result of the transformValues function
         updateAnswerMutation.mutate({
             questionId: qa.question_id,
             answer: values.answer,
@@ -83,15 +104,18 @@ const QuestionItem = ({qa, isEditing, toggleEditMode, onEditAnswer, eventId, hid
         });
     };
 
-    const answer = formatAnswer(qa.answer);
-
     return (
-        <div className={classes.question}>
-            <div className={classes.questionHeader}>
-                <Text size="xs" className={classes.questionText}>{qa.title}</Text>
-                {qa.product_title && !hideProductTitle && (
-                    <Text size="xs" className={classes.productTitle}>{qa.product_title}</Text>
-                )}
+        <div className={compact ? classes.questionCompact : classes.questionCard}>
+            {qa.product_title && !compact && (
+                <Text size="sm" className={classes.productTitle}>
+                    {qa.product_title}
+                </Text>
+            )}
+
+            <div className={classes.questionTitle}>
+                <Text size="xs" className={classes.questionText}>
+                    {qa.title}
+                </Text>
             </div>
 
             {isEditing ? (
@@ -129,15 +153,14 @@ const QuestionItem = ({qa, isEditing, toggleEditMode, onEditAnswer, eventId, hid
                 </form>
             ) : (
                 <div className={classes.answerContainer}>
-                    {answer
-                        ? <Text size="sm" className={classes.answer}>{answer}</Text>
-                        : <Text size="sm" className={classes.emptyAnswer}>—</Text>}
+                    <Text size="sm" className={classes.answer} style={{whiteSpace: 'pre-line'}}>
+                        {formatAnswer(qa.answer)}
+                    </Text>
                     <Tooltip label={t`Edit Answer`} position="bottom" withArrow>
                         <ActionIcon
                             variant="subtle"
                             radius="xl"
                             size="sm"
-                            className={classes.editButton}
                             onClick={() => toggleEditMode(qa.question_id)}
                         >
                             <IconEdit size={16}/>
@@ -145,13 +168,51 @@ const QuestionItem = ({qa, isEditing, toggleEditMode, onEditAnswer, eventId, hid
                     </Tooltip>
                 </div>
             )}
+
+            {qa.attendee_id && !compact && !hideAttendeeInfo && (
+                <div className={classes.attendeeInfo}>
+                    <IconUser size={14} stroke={1.5}/>
+                    <Text size="sm" span>
+                        {qa.first_name
+                            ? `${qa.first_name} ${qa.last_name}`
+                            : t`N/A`}
+                    </Text>
+                    <Tooltip
+                        label={t`Navigate to Attendee`}
+                        position="bottom"
+                        withArrow
+                    >
+                        <NavLink to={`../attendees?query=${qa.attendee_public_id}`}>
+                            <ActionIcon
+                                variant="subtle"
+                                radius="xl"
+                                size="xs"
+                            >
+                                <IconExternalLink size={12}/>
+                            </ActionIcon>
+                        </NavLink>
+                    </Tooltip>
+                </div>
+            )}
         </div>
     );
 };
 
-export const QuestionList = ({questions, onEditAnswer, hideProductTitle = false}: QuestionListProps) => {
+export const QuestionList = ({questions, onEditAnswer, compact = false}: QuestionListProps) => {
     const {eventId} = useParams();
-    const {toggleEditMode, isEditing} = useEditingQuestions();
+    const [editingQuestionIds, setEditingQuestionIds] = useState<IdParam[]>([]);
+
+    const toggleEditMode = (questionId: IdParam) => {
+        setEditingQuestionIds(prev =>
+            prev.includes(questionId)
+                ? prev.filter(id => id !== questionId)
+                : [...prev, questionId]
+        );
+    };
+
+    const isEditing = (questionId: IdParam) => {
+        return editingQuestionIds.includes(questionId);
+    };
 
     if (!questions.length) {
         return null;
@@ -166,58 +227,94 @@ export const QuestionList = ({questions, onEditAnswer, hideProductTitle = false}
                     isEditing={isEditing(qa.question_id)}
                     toggleEditMode={toggleEditMode}
                     onEditAnswer={onEditAnswer}
+                    compact={compact}
                     eventId={eventId}
-                    hideProductTitle={hideProductTitle}
                 />
             ))}
         </div>
     );
 };
 
-const AttendeeQuestionsList = ({questions, onEditAnswer}: { questions: QuestionAnswer[]; onEditAnswer?: () => void }) => {
+// New component to group questions by attendee
+export const AttendeeQuestionsList = ({attendeeQuestions, onEditAnswer, compact = false}: AttendeeQuestionsListProps) => {
     const {eventId} = useParams();
-    const {toggleEditMode, isEditing} = useEditingQuestions();
+    const [editingQuestionIds, setEditingQuestionIds] = useState<IdParam[]>([]);
 
-    const groupedByAttendee = questions.reduce<Record<string, QuestionAnswer[]>>((groups, qa) => {
-        const key = String(qa.attendee_id ?? 'unknown');
-        (groups[key] ??= []).push(qa);
-        return groups;
-    }, {});
+    const toggleEditMode = (questionId: IdParam) => {
+        setEditingQuestionIds(prev =>
+            prev.includes(questionId)
+                ? prev.filter(id => id !== questionId)
+                : [...prev, questionId]
+        );
+    };
+
+    const isEditing = (questionId: IdParam) => {
+        return editingQuestionIds.includes(questionId);
+    };
+
+    if (!attendeeQuestions.length) {
+        return null;
+    }
+
+    // Group questions by attendee
+    const groupedByAttendee: Record<string, QuestionAnswer[]> = {};
+
+    attendeeQuestions.forEach(qa => {
+        const attendeeKey = qa.attendee_id || 'unknown';
+        if (!groupedByAttendee[attendeeKey]) {
+            groupedByAttendee[attendeeKey] = [];
+        }
+        groupedByAttendee[attendeeKey].push(qa);
+    });
 
     return (
-        <div className={classes.attendeeGroups}>
-            {Object.entries(groupedByAttendee).map(([attendeeId, attendeeQuestions]) => {
-                const attendee = attendeeQuestions[0];
-                const name = attendee.first_name ? `${attendee.first_name} ${attendee.last_name}` : t`Unknown Attendee`;
+        <div className={classes.attendeeQuestionsList}>
+            {Object.entries(groupedByAttendee).map(([attendeeId, questions]) => {
+                const attendeeInfo = questions[0]; // Take first question to get attendee info
 
                 return (
-                    <div key={attendeeId} className={classes.attendeeGroup}>
+                    <div key={attendeeId} className={classes.attendeeSection}>
+                        {/* Attendee header with name and link */}
                         <div className={classes.attendeeHeader}>
-                            <IconUser size={14} stroke={1.5} className={classes.attendeeIcon}/>
-                            <Text size="sm" fw={600} className={classes.attendeeName}>{name}</Text>
-                            {attendee.product_title && (
-                                <Text size="xs" className={classes.productTitle}>{attendee.product_title}</Text>
-                            )}
-                            {attendee.attendee_public_id && (
-                                <Tooltip label={t`Navigate to Attendee`} position="bottom" withArrow>
-                                    <NavLink to={`../attendees?query=${attendee.attendee_public_id}`}>
-                                        <ActionIcon variant="subtle" radius="xl" size="xs">
+                            <Group gap="xs">
+                                <IconUser size={16} stroke={1.5}/>
+                                <Text size="sm" fw={600}>
+                                    {attendeeInfo.first_name
+                                        ? `${attendeeInfo.first_name} ${attendeeInfo.last_name}`
+                                        : t`Unknown Attendee`}
+                                </Text>
+                            </Group>
+                            {attendeeInfo.attendee_public_id && (
+                                <Tooltip
+                                    label={t`Navigate to Attendee`}
+                                    position="bottom"
+                                    withArrow
+                                >
+                                    <NavLink to={`../attendees?query=${attendeeInfo.attendee_public_id}`}>
+                                        <ActionIcon
+                                            variant="subtle"
+                                            radius="xl"
+                                            size="xs"
+                                        >
                                             <IconExternalLink size={14}/>
                                         </ActionIcon>
                                     </NavLink>
                                 </Tooltip>
                             )}
                         </div>
-                        <div className={classes.questionsList}>
-                            {attendeeQuestions.map((qa, index) => (
+
+                        {/* Questions for this attendee */}
+                        <div className={classes.attendeeQuestions}>
+                            {questions.map((qa, index) => (
                                 <QuestionItem
                                     key={`${qa.question_id}-${index}`}
                                     qa={qa}
                                     isEditing={isEditing(qa.question_id)}
                                     toggleEditMode={toggleEditMode}
                                     onEditAnswer={onEditAnswer}
+                                    compact={compact}
                                     eventId={eventId}
-                                    hideProductTitle
+                                    hideAttendeeInfo={true} // Hide attendee info since we're showing it in the header
                                 />
                             ))}
                         </div>
@@ -233,37 +330,60 @@ export const QuestionAndAnswerList = ({questionAnswers, belongsToFilter, onEditA
         ? questionAnswers.filter(qa => belongsToFilter.includes(qa.belongs_to))
         : questionAnswers;
 
-    const orderQuestions = filteredQuestions.filter(qa => qa.belongs_to === 'ORDER');
-    const attendeeQuestions = filteredQuestions.filter(qa => qa.belongs_to === 'PRODUCT' && qa.attendee_id);
     const productQuestions = filteredQuestions.filter(qa => qa.belongs_to === 'PRODUCT' && !qa.attendee_id);
+    const attendeeQuestions = filteredQuestions.filter(qa => qa.belongs_to === 'PRODUCT' && qa.attendee_id);
+    const orderQuestions = filteredQuestions.filter(qa => qa.belongs_to === 'ORDER');
 
-    const renderGroup = (title: string, questions: QuestionAnswer[], content: ReactNode) => {
+    const renderSection = (title: string, questions: QuestionAnswer[], isAttendeeSection = false) => {
+        const getIcon = () => {
+            switch (title) {
+                case 'Attendee Answers':
+                    return <IconUser size={20} stroke={1.5}/>;
+                case 'Order Answers':
+                    return <IconShoppingCart size={20} stroke={1.5}/>;
+                case 'Product Answers':
+                    return <IconPackage size={20} stroke={1.5}/>;
+                default:
+                    return null;
+            }
+        };
+
         if (questions.length === 0) {
             return null;
         }
 
         return (
-            <div className={classes.group}>
-                <div className={classes.groupHeader}>
-                    <Text size="xs" fw={600} className={classes.groupTitle}>{title}</Text>
-                    <span className={classes.groupCount}>{questions.length}</span>
-                </div>
-                {content}
+            <div className={classes.section}>
+                <Group justify="space-between" className={classes.sectionHeader}>
+                    <Group gap="xs">
+                        {getIcon()}
+                        <Text fw={600} size="sm">{title}</Text>
+                    </Group>
+                    <Text size="sm" c="dimmed">
+                        {questions.length} {questions.length === 1 ? 'response' : 'responses'}
+                    </Text>
+                </Group>
+
+                {isAttendeeSection ? (
+                    <AttendeeQuestionsList
+                        attendeeQuestions={questions}
+                        onEditAnswer={onEditAnswer}
+                    />
+                ) : (
+                    <QuestionList
+                        questions={questions}
+                        onEditAnswer={onEditAnswer}
+                    />
+                )}
             </div>
         );
     };
 
     return (
         <div className={classes.container}>
-            {renderGroup(t`Order answers`, orderQuestions, (
-                <QuestionList questions={orderQuestions} onEditAnswer={onEditAnswer}/>
-            ))}
-            {renderGroup(t`Attendee answers`, attendeeQuestions, (
-                <AttendeeQuestionsList questions={attendeeQuestions} onEditAnswer={onEditAnswer}/>
-            ))}
-            {renderGroup(t`Product answers`, productQuestions, (
-                <QuestionList questions={productQuestions} onEditAnswer={onEditAnswer}/>
-            ))}
+            {renderSection('Order Answers', orderQuestions)}
+            {renderSection('Attendee Answers', attendeeQuestions, true)}
+            {renderSection('Product Answers', productQuestions)}
         </div>
     );
 };

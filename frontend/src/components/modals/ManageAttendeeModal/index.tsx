@@ -258,7 +258,6 @@ export const ManageAttendeeModal = ({onClose, attendeeId}: ManageAttendeeModalPr
                     {questionAnswers.length > 0 && (
                         <SideDrawerSection title={t`Questions & Answers`} count={questionAnswers.length}>
                             <QuestionList
-                                hideProductTitle
                                 onEditAnswer={refetchAttendee}
                                 questions={questionAnswers as QuestionAnswer[]}
                             />

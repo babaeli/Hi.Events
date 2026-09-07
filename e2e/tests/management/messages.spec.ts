@@ -4,7 +4,6 @@ import { createDraftEvent } from '../../api/factory';
 import { uniqueName } from '../../utils/unique';
 
 test.describe('messages', () => {
-
   test('an organizer sends a message to all attendees and sees it in the list', { tag: '@smoke' }, async ({ authedPage, api, account }) => {
     const event = await createDraftEvent(api, account.organizerId);
     const subject = uniqueName('Important update');

@@ -1,15 +1,11 @@
 <?php
 
 use HiEvents\Http\Actions\Accounts\CreateAccountAction;
-use HiEvents\Http\Actions\Accounts\DeletionRequest\CancelAccountDeletionAction;
-use HiEvents\Http\Actions\Accounts\DeletionRequest\GetAccountDeletionStatusAction;
-use HiEvents\Http\Actions\Accounts\DeletionRequest\RequestAccountDeletionAction;
 use HiEvents\Http\Actions\Accounts\GetAccountAction;
 use HiEvents\Http\Actions\Accounts\UpdateAccountAction;
 use HiEvents\Http\Actions\Admin\Accounts\GetAccountAction as GetAdminAccountAction;
 use HiEvents\Http\Actions\Admin\Accounts\GetAllAccountsAction as GetAllAdminAccountsAction;
 use HiEvents\Http\Actions\Admin\Accounts\UpdateAccountMessagingTierAction;
-use HiEvents\Http\Actions\Admin\Accounts\UpdateAccountVerificationAction;
 use HiEvents\Http\Actions\Admin\Announcements\CreateAnnouncementAction;
 use HiEvents\Http\Actions\Admin\Announcements\DeleteAnnouncementAction;
 use HiEvents\Http\Actions\Admin\Announcements\GetAllAnnouncementsAction;
@@ -19,10 +15,6 @@ use HiEvents\Http\Actions\Admin\Configurations\CreateConfigurationAction;
 use HiEvents\Http\Actions\Admin\Configurations\DeleteConfigurationAction;
 use HiEvents\Http\Actions\Admin\Configurations\GetAllConfigurationsAction;
 use HiEvents\Http\Actions\Admin\Configurations\UpdateConfigurationAction;
-use HiEvents\Http\Actions\Admin\DeletionRequests\AdminCancelAccountDeletionAction;
-use HiEvents\Http\Actions\Admin\DeletionRequests\AdminExecuteAccountDeletionAction;
-use HiEvents\Http\Actions\Admin\DeletionRequests\AdminRequestAccountDeletionAction;
-use HiEvents\Http\Actions\Admin\DeletionRequests\GetAllAccountDeletionRequestsAction;
 use HiEvents\Http\Actions\Admin\Events\GetAllEventsAction as GetAllAdminEventsAction;
 use HiEvents\Http\Actions\Admin\Events\GetUpcomingEventsAction;
 use HiEvents\Http\Actions\Admin\FailedJobs\DeleteAllFailedJobsAction;
@@ -38,9 +30,6 @@ use HiEvents\Http\Actions\Admin\Orders\GetAllOrdersAction;
 use HiEvents\Http\Actions\Admin\Organizers\AssignOrganizerConfigurationAction;
 use HiEvents\Http\Actions\Admin\Organizers\UpdateOrganizerConfigurationAction;
 use HiEvents\Http\Actions\Admin\Organizers\UpdateOrganizerVatSettingAction;
-use HiEvents\Http\Actions\Admin\SpamEvents\ApproveSpamEventAction;
-use HiEvents\Http\Actions\Admin\SpamEvents\ConfirmSpamEventAction;
-use HiEvents\Http\Actions\Admin\SpamEvents\GetAllSpamEventsAction;
 use HiEvents\Http\Actions\Admin\Stats\GetAdminDashboardDataAction;
 use HiEvents\Http\Actions\Admin\Stats\GetAdminStatsAction;
 use HiEvents\Http\Actions\Admin\Users\GetAllUsersAction;
@@ -108,10 +97,10 @@ use HiEvents\Http\Actions\EventOccurrences\CreateEventOccurrenceAction;
 use HiEvents\Http\Actions\EventOccurrences\DeleteEventOccurrenceAction;
 use HiEvents\Http\Actions\EventOccurrences\DeletePriceOverrideAction;
 use HiEvents\Http\Actions\EventOccurrences\GenerateOccurrencesAction;
+use HiEvents\Http\Actions\EventOccurrences\GetOccurrenceGenerationStatusAction;
 use HiEvents\Http\Actions\EventOccurrences\GetEventOccurrenceAction;
 use HiEvents\Http\Actions\EventOccurrences\GetEventOccurrencesAction;
 use HiEvents\Http\Actions\EventOccurrences\GetEventOccurrencesPublicAction;
-use HiEvents\Http\Actions\EventOccurrences\GetOccurrenceGenerationStatusAction;
 use HiEvents\Http\Actions\EventOccurrences\GetPriceOverridesAction;
 use HiEvents\Http\Actions\EventOccurrences\GetProductVisibilityAction;
 use HiEvents\Http\Actions\EventOccurrences\ReactivateOccurrenceAction;
@@ -129,7 +118,6 @@ use HiEvents\Http\Actions\Events\GetOrganizerEventsPublicAction;
 use HiEvents\Http\Actions\Events\Images\CreateEventImageAction;
 use HiEvents\Http\Actions\Events\Images\DeleteEventImageAction;
 use HiEvents\Http\Actions\Events\Images\GetEventImagesAction;
-use HiEvents\Http\Actions\Events\Stats\GetEventCountsAction;
 use HiEvents\Http\Actions\Events\Stats\GetEventStatsAction;
 use HiEvents\Http\Actions\Events\UpdateEventAction;
 use HiEvents\Http\Actions\Events\UpdateEventLocationAction;
@@ -184,7 +172,6 @@ use HiEvents\Http\Actions\Organizers\Settings\PartialUpdateOrganizerSettingsActi
 use HiEvents\Http\Actions\Organizers\Stats\GetOrganizerStatsAction;
 use HiEvents\Http\Actions\Organizers\Stripe\CopyStripeConnectAccountAction;
 use HiEvents\Http\Actions\Organizers\Stripe\CreateStripeConnectAccountAction;
-use HiEvents\Http\Actions\Organizers\Stripe\DisconnectStripeConnectAccountAction;
 use HiEvents\Http\Actions\Organizers\Stripe\GetStripeConnectAccountsAction;
 use HiEvents\Http\Actions\Organizers\UpdateOrganizerLocationAction;
 use HiEvents\Http\Actions\Organizers\UpdateOrganizerStatusAction;
@@ -315,9 +302,6 @@ $router->middleware(['auth:api'])->group(
         $router->post('/announcements/{announcement_id}/dismiss', DismissAnnouncementAction::class);
 
         // Accounts
-        $router->post('/accounts/deletion-request', RequestAccountDeletionAction::class);
-        $router->delete('/accounts/deletion-request', CancelAccountDeletionAction::class);
-        $router->get('/accounts/deletion-request', GetAccountDeletionStatusAction::class);
         $router->get('/accounts/{account_id?}', GetAccountAction::class);
         $router->put('/accounts/{account_id?}', UpdateAccountAction::class);
 
@@ -361,8 +345,6 @@ $router->middleware(['auth:api'])->group(
         $router->get('/organizers/{organizerId}/stripe/connect_accounts', GetStripeConnectAccountsAction::class);
         $router->post('/organizers/{organizerId}/stripe/connect', CreateStripeConnectAccountAction::class);
         $router->post('/organizers/{organizerId}/stripe/copy_from/{sourceOrganizerId}', CopyStripeConnectAccountAction::class);
-        $router->delete('/organizers/{organizerId}/stripe/connect_accounts/{stripeAccountId}', DisconnectStripeConnectAccountAction::class)
-            ->where('stripeAccountId', '[A-Za-z0-9_]+');
 
         // VAT Settings - Organizer level
         $router->get('/organizers/{organizerId}/vat-settings', GetOrganizerVatSettingAction::class);
@@ -411,7 +393,6 @@ $router->middleware(['auth:api'])->group(
 
         // Stats
         $router->get('/events/{event_id}/stats', GetEventStatsAction::class);
-        $router->get('/events/{event_id}/counts', GetEventCountsAction::class);
 
         // Email Templates - Event level
         $router->get('/events/{eventId}/email-templates', GetEventEmailTemplatesAction::class);
@@ -448,6 +429,7 @@ $router->middleware(['auth:api'])->group(
         $router->get('/events/{event_id}/questions/{question_id}', GetQuestionAction::class);
         $router->delete('/events/{event_id}/questions/{question_id}', DeleteQuestionAction::class);
         $router->get('/events/{event_id}/questions', GetQuestionsAction::class);
+        $router->post('/events/{event_id}/questions/export', ExportOrdersAction::class);
         $router->post('/events/{event_id}/questions/sort', SortQuestionsAction::class);
         $router->put('/events/{event_id}/questions/{question_id}/answers/{answer_id}', EditQuestionAnswerAction::class);
         $router->match(['get', 'post'], '/events/{event_id}/questions/answers/export', ExportQuestionAnswersAction::class);
@@ -570,11 +552,6 @@ $router->prefix('/admin')->middleware(['auth:api'])->group(
         $router->get('/messages', GetAllAdminMessagesAction::class);
         $router->post('/messages/{message_id}/approve', ApproveMessageAction::class);
 
-        // Spam Events
-        $router->get('/spam-events', GetAllSpamEventsAction::class);
-        $router->post('/spam-events/{event_id}/approve', ApproveSpamEventAction::class);
-        $router->post('/spam-events/{event_id}/confirm-spam', ConfirmSpamEventAction::class);
-
         // Announcements
         $router->get('/announcements', GetAllAnnouncementsAction::class);
         $router->post('/announcements', CreateAnnouncementAction::class);
@@ -584,15 +561,6 @@ $router->prefix('/admin')->middleware(['auth:api'])->group(
         // Messaging Tiers
         $router->get('/messaging-tiers', GetMessagingTiersAction::class);
         $router->put('/accounts/{account_id}/messaging-tier', UpdateAccountMessagingTierAction::class);
-
-        // Account Verification
-        $router->put('/accounts/{account_id}/verification', UpdateAccountVerificationAction::class);
-
-        // Account Deletion Requests
-        $router->get('/deletion-requests', GetAllAccountDeletionRequestsAction::class);
-        $router->post('/accounts/{account_id}/deletion-request', AdminRequestAccountDeletionAction::class);
-        $router->delete('/deletion-requests/{deletion_request_id}', AdminCancelAccountDeletionAction::class);
-        $router->post('/deletion-requests/{deletion_request_id}/execute', AdminExecuteAccountDeletionAction::class);
 
         // System Info
         $router->get('/system-info', GetSystemInfoAction::class);
@@ -636,8 +604,7 @@ $router->prefix('/public')->group(
             ->middleware('throttle:10,1');
 
         // Promo codes
-        $router->get('/events/{event_id}/promo-codes/{promo_code}', GetPromoCodePublic::class)
-            ->middleware('throttle:10,1');
+        $router->get('/events/{event_id}/promo-codes/{promo_code}', GetPromoCodePublic::class);
 
         // Stripe payment gateway
         $router->post('/events/{event_id}/order/{order_short_id}/stripe/payment_intent', CreatePaymentIntentActionPublic::class);
@@ -682,6 +649,4 @@ $router->prefix('/public')->group(
     }
 );
 
-if (app()->environment('local', 'development')) {
-    include_once __DIR__.'/mail.php';
-}
+include_once __DIR__.'/mail.php';

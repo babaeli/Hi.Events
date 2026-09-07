@@ -18,9 +18,4 @@ class OrganizerConfigurationDomainObject extends Generated\OrganizerConfiguratio
     {
         return $this->getApplicationFees()['currency'] ?? 'USD';
     }
-
-    public function isDefault(): bool
-    {
-        return $this->getIsSystemDefault() || $this->getDefaultForCurrency() !== null;
-    }
 }

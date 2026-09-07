@@ -1,0 +1,13 @@
+# Exclude sensitive credential files
+ADMIN_CREDENTIALS.txt
+create-admin.php
+create-super-admin.php
+
+# Keep these documentation files
+!START_HERE.txt
+!COMPLETE_SETUP_GUIDE.md
+!TESTING_GUIDE.md
+!FEATURES_LIST.md
+!QUICK_FEATURES_COMPARISON.txt
+!QUICK_TEST_REFERENCE.txt
+!SUPER_ADMIN_SETUP.md

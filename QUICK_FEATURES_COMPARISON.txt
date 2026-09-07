@@ -1,0 +1,221 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    HI.EVENTS - FEATURES COMPARISON                             ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                         👥 EVENT ORGANIZER vs 👑 SUPER ADMIN                   │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+📊 DASHBOARD & OVERVIEW
+════════════════════════════════════════════════════════════════════════════════
+Feature                         │ Organizer        │ Super Admin
+────────────────────────────────┼──────────────────┼─────────────────────
+Main Dashboard                  │ /manage/events   │ /admin
+View Events                     │ Own events only  │ ALL events
+View Revenue                    │ Own revenue      │ Platform-wide revenue
+View Orders                     │ Own orders       │ ALL orders
+View Attendees                  │ Own attendees    │ ALL attendees
+View Accounts                   │ Own account      │ ALL accounts
+Platform Statistics             │ ❌ No            │ ✅ Yes
+
+════════════════════════════════════════════════════════════════════════════════
+🎟️ EVENT MANAGEMENT
+════════════════════════════════════════════════════════════════════════════════
+Feature                         │ Organizer        │ Super Admin
+────────────────────────────────┼──────────────────┼─────────────────────
+Create Events                   │ ✅ Yes           │ ✅ Yes (via impersonation)
+Edit Events                     │ ✅ Own only      │ ✅ Any event
+Delete Events                   │ ✅ Own only      │ ✅ Any event
+Duplicate Events                │ ✅ Yes           │ ✅ Yes
+View Event Analytics            │ ✅ Own events    │ ✅ All events
+Event Categories                │ ✅ Manage own    │ ✅ View all
+Recurring Events                │ ✅ Yes           │ ✅ View all
+
+════════════════════════════════════════════════════════════════════════════════
+💳 TICKETS & SALES
+════════════════════════════════════════════════════════════════════════════════
+Feature                         │ Organizer        │ Super Admin
+────────────────────────────────┼──────────────────┼─────────────────────
+Create Tickets                  │ ✅ Yes           │ ✅ Via impersonation
+Set Prices                      │ ✅ Yes           │ ✅ Via impersonation
+Promo Codes                     │ ✅ Create own    │ ✅ View all
+Product Add-ons                 │ ✅ Yes           │ ✅ View all
+Process Sales                   │ ✅ Automatic     │ ✅ Monitor all
+View Sales Reports              │ ✅ Own events    │ ✅ Platform-wide
+
+════════════════════════════════════════════════════════════════════════════════
+💰 FINANCIAL MANAGEMENT
+════════════════════════════════════════════════════════════════════════════════
+Feature                         │ Organizer        │ Super Admin
+────────────────────────────────┼──────────────────┼─────────────────────
+Receive Payments                │ ✅ Yes           │ ✅ Platform fees
+Process Refunds                 │ ✅ Own orders    │ ✅ Any order
+View Revenue                    │ ✅ Own           │ ✅ Total + Platform fees
+Financial Reports               │ ✅ Own account   │ ✅ Platform-wide
+Tax Reports                     │ ✅ Own           │ ✅ All accounts
+Stripe Connect                  │ ✅ Connect own   │ ✅ View all connections
+Set Platform Fees               │ ❌ No            │ ✅ Yes
+
+════════════════════════════════════════════════════════════════════════════════
+👤 USER & ATTENDEE MANAGEMENT
+════════════════════════════════════════════════════════════════════════════════
+Feature                         │ Organizer        │ Super Admin
+────────────────────────────────┼──────────────────┼─────────────────────
+View Attendees                  │ ✅ Own events    │ ✅ All events
+Export Attendee Data            │ ✅ Own events    │ ✅ All events
+Check-in System                 │ ✅ Own events    │ ✅ View all
+Custom Questions                │ ✅ Yes           │ ✅ View all
+Edit Attendee Info              │ ✅ Own attendees │ ✅ Any attendee
+Team Management                 │ ✅ Own team      │ ✅ View all teams
+Invite Users                    │ ✅ To own account│ ✅ N/A
+
+════════════════════════════════════════════════════════════════════════════════
+📧 COMMUNICATION
+════════════════════════════════════════════════════════════════════════════════
+Feature                         │ Organizer        │ Super Admin
+────────────────────────────────┼──────────────────┼─────────────────────
+Email Attendees                 │ ✅ Own attendees │ ✅ View all messages
+Bulk Messaging                  │ ✅ Own attendees │ ✅ View all
+Email Templates                 │ ✅ Customize     │ ✅ View all
+Message Approval                │ ❌ N/A           │ ✅ Yes (if enabled)
+Automated Emails                │ ✅ Yes           │ ✅ Monitor all
+Message History                 │ ✅ Own messages  │ ✅ All messages
+
+════════════════════════════════════════════════════════════════════════════════
+📊 ANALYTICS & REPORTS
+════════════════════════════════════════════════════════════════════════════════
+Feature                         │ Organizer        │ Super Admin
+────────────────────────────────┼──────────────────┼─────────────────────
+Sales Analytics                 │ ✅ Own events    │ ✅ Platform-wide
+Revenue Tracking                │ ✅ Own revenue   │ ✅ Total platform revenue
+Attendee Analytics              │ ✅ Own attendees │ ✅ All attendees
+Traffic Analytics               │ ✅ Own events    │ ✅ Platform traffic
+Export Reports                  │ ✅ Own data      │ ✅ All data
+Growth Metrics                  │ ✅ Own growth    │ ✅ Platform growth
+Top Performing Events           │ ✅ Own events    │ ✅ All events
+
+════════════════════════════════════════════════════════════════════════════════
+🎭 SPECIAL FEATURES
+════════════════════════════════════════════════════════════════════════════════
+Feature                         │ Organizer        │ Super Admin
+────────────────────────────────┼──────────────────┼─────────────────────
+Impersonate Users               │ ❌ No            │ ✅ Yes
+Access Admin Dashboard          │ ❌ No            │ ✅ Yes
+View All Accounts               │ ❌ No            │ ✅ Yes
+Platform Configuration          │ ❌ No            │ ✅ Yes
+System Monitoring               │ ❌ No            │ ✅ Yes
+Failed Jobs Management          │ ❌ No            │ ✅ Yes
+API Full Access                 │ ✅ Own account   │ ✅ Platform-wide
+Webhooks                        │ ✅ Own events    │ ✅ All events
+
+════════════════════════════════════════════════════════════════════════════════
+🔐 SECURITY & ACCESS
+════════════════════════════════════════════════════════════════════════════════
+Feature                         │ Organizer        │ Super Admin
+────────────────────────────────┼──────────────────┼─────────────────────
+Data Access                     │ Own account only │ All accounts
+Edit Other Accounts             │ ❌ No            │ ✅ Yes (via impersonation)
+View Audit Logs                 │ ✅ Own actions   │ ✅ All actions
+Suspend Accounts                │ ❌ No            │ ✅ Yes
+Delete Accounts                 │ ✅ Own only      │ ✅ Any account
+Manage Users                    │ ✅ Own team      │ ✅ All users
+
+════════════════════════════════════════════════════════════════════════════════
+💡 KEY CAPABILITY SUMMARY
+════════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 👥 EVENT ORGANIZER - "I want to sell tickets for MY events"                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ ✅ Create and manage events                                                  │
+│ ✅ Sell tickets online                                                       │
+│ ✅ Track sales and revenue                                                   │
+│ ✅ Manage attendees                                                          │
+│ ✅ Send messages to ticket buyers                                            │
+│ ✅ Check-in attendees with QR codes                                          │
+│ ✅ Process refunds                                                           │
+│ ✅ View analytics for own events                                             │
+│ ✅ Customize branding                                                        │
+│ ✅ Integrate with Stripe                                                     │
+│                                                                              │
+│ ❌ CANNOT see other organizers' events                                       │
+│ ❌ CANNOT access platform admin features                                     │
+│ ❌ CANNOT impersonate other users                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 👑 SUPER ADMIN - "I own the platform and oversee ALL organizers"            │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ ✅ View ALL organizers and their events                                      │
+│ ✅ See platform-wide statistics                                              │
+│ ✅ Track total revenue + platform fees                                       │
+│ ✅ Impersonate any organizer                                                 │
+│ ✅ Provide customer support                                                  │
+│ ✅ Monitor system health                                                     │
+│ ✅ Manage platform configurations                                            │
+│ ✅ Access all financial reports                                              │
+│ ✅ View all orders across platform                                           │
+│ ✅ Control platform fees                                                     │
+│                                                                              │
+│ 🎯 PRIMARY ROLE: Platform oversight and support                             │
+│ 💰 REVENUE: Earn platform fees from all sales                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+📈 REVENUE MODEL
+════════════════════════════════════════════════════════════════════════════════
+
+When Organizer sells a $100 ticket:
+
+    $100.00 (Ticket Price)
+    ├─ $10.00 (10% Platform Fee)           → Goes to SUPER ADMIN
+    ├─ $0.50  (Fixed Platform Fee)         → Goes to SUPER ADMIN
+    └─ $89.50 (Organizer Revenue)          → Goes to ORGANIZER
+
+Super Admin earns: $10.50 per ticket
+Organizer keeps: $89.50 per ticket
+
+════════════════════════════════════════════════════════════════════════════════
+🎯 USE CASE EXAMPLES
+════════════════════════════════════════════════════════════════════════════════
+
+ORGANIZER Example:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ "Music Festival Promoter" logs in                                           │
+│                                                                             │
+│ 1. Creates event: "Summer Music Fest 2026"                                 │
+│ 2. Sets up 5 ticket types ($50-$500)                                       │
+│ 3. Creates promo code "EARLYBIRD" (20% off)                                │
+│ 4. Sells 1,000 tickets                                                     │
+│ 5. Revenue: $50,000                                                        │
+│    - Keeps: ~$45,000                                                       │
+│    - Platform fee: ~$5,000 (goes to Super Admin)                          │
+│ 6. Uses check-in app at event                                              │
+│ 7. Sends thank you email to all attendees                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+SUPER ADMIN Example:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ "Platform Owner" logs in to /admin                                          │
+│                                                                             │
+│ Dashboard shows:                                                            │
+│ - 50 active organizers                                                      │
+│ - 200 events this month                                                     │
+│ - $2,000,000 in ticket sales                                                │
+│ - $200,000 in platform fees earned                                          │
+│                                                                             │
+│ Gets support ticket: "Can't edit my event!"                                 │
+│ 1. Finds organizer in Accounts list                                         │
+│ 2. Clicks "Impersonate"                                                     │
+│ 3. Sees the issue immediately                                               │
+│ 4. Fixes ticket configuration                                               │
+│ 5. Stops impersonation                                                      │
+│ 6. Customer happy!                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+
+🎉 For complete detailed features list, see: FEATURES_LIST.md
+
+════════════════════════════════════════════════════════════════════════════════

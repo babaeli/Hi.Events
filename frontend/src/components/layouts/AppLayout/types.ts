@@ -20,7 +20,7 @@ export interface BreadcrumbItem {
 }
 
 export interface StatusToggleConfig {
-    status: 'DRAFT' | 'LIVE' | 'PENDING_MANUAL_REVIEW';
+    status: 'DRAFT' | 'LIVE';
     onToggle: () => void;
     statusMessages?: {
         draft?: string;

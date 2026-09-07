@@ -2,7 +2,6 @@ import React, {useState} from "react";
 import {useNavigate, useParams} from "react-router";
 import {useGetEventPublic} from "../../../../queries/useGetEventPublic.ts";
 import {CheckoutContent} from "../../../layouts/Checkout/CheckoutContent";
-import {CheckoutStepTitle} from "../../../layouts/Checkout/CheckoutStepTitle";
 import {StripePaymentMethod} from "./PaymentMethods/Stripe";
 import {OfflinePaymentMethod} from "./PaymentMethods/Offline";
 import {Event} from "../../../../types.ts";
@@ -95,8 +94,6 @@ const Payment = () => {
     return (
         <>
             <CheckoutContent>
-                <CheckoutStepTitle title={t`Payment`} subtitle={t`Next: review your order`}/>
-
                 {(checkoutEvent && order) && (
                     <InlineOrderSummary event={checkoutEvent} order={order} defaultExpanded={false}/>
                 )}

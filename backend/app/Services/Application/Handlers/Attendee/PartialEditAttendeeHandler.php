@@ -54,16 +54,14 @@ class PartialEditAttendeeHandler
             throw new ResourceNotFoundException;
         }
 
-        $status = $data->status ? strtoupper($data->status) : null;
-
-        $statusIsUpdated = $status && $status !== $attendee->getStatus();
+        $statusIsUpdated = $data->status && $data->status !== $attendee->getStatus();
 
         if ($statusIsUpdated) {
-            $this->adjustProductQuantity($status, $attendee);
-            $this->adjustEventStatistics($status, $attendee);
+            $this->adjustProductQuantity($data, $attendee);
+            $this->adjustEventStatistics($data, $attendee);
         }
 
-        if ($statusIsUpdated && $status === AttendeeStatus::CANCELLED->name) {
+        if ($statusIsUpdated && $data->status === AttendeeStatus::CANCELLED->name) {
             $this->domainEventDispatcherService->dispatch(
                 new AttendeeEvent(
                     type: DomainEventType::ATTENDEE_CANCELLED,
@@ -75,7 +73,9 @@ class PartialEditAttendeeHandler
         return $this->attendeeRepository->updateByIdWhere(
             id: $data->attendee_id,
             attributes: [
-                'status' => $status ?? $attendee->getStatus(),
+                'status' => $data->status
+                    ? strtoupper($data->status)
+                    : $attendee->getStatus(),
                 'first_name' => $data->first_name ?? $attendee->getFirstName(),
                 'last_name' => $data->last_name ?? $attendee->getLastName(),
                 'email' => $data->email ?? $attendee->getEmail(),
@@ -88,9 +88,9 @@ class PartialEditAttendeeHandler
     /**
      * @todo - we should check product availability before updating the product quantity
      */
-    private function adjustProductQuantity(string $status, AttendeeDomainObject $attendee): void
+    private function adjustProductQuantity(PartialEditAttendeeDTO $data, AttendeeDomainObject $attendee): void
     {
-        if ($status === AttendeeStatus::ACTIVE->name) {
+        if ($data->status === AttendeeStatus::ACTIVE->name) {
             $this->productQuantityService->increaseQuantitySold($attendee->getProductPriceId(), 1, $attendee->getEventOccurrenceId());
 
             event(new CapacityChangedEvent(
@@ -100,7 +100,7 @@ class PartialEditAttendeeHandler
                 productPriceId: $attendee->getProductPriceId(),
                 eventOccurrenceId: $attendee->getEventOccurrenceId(),
             ));
-        } elseif ($status === AttendeeStatus::CANCELLED->name) {
+        } elseif ($data->status === AttendeeStatus::CANCELLED->name) {
             $this->productQuantityService->decreaseQuantitySold($attendee->getProductPriceId(), 1, $attendee->getEventOccurrenceId());
 
             event(new CapacityChangedEvent(
@@ -118,7 +118,7 @@ class PartialEditAttendeeHandler
      *
      * @throws Throwable
      */
-    private function adjustEventStatistics(string $status, AttendeeDomainObject $attendee): void
+    private function adjustEventStatistics(PartialEditAttendeeDTO $data, AttendeeDomainObject $attendee): void
     {
         $order = $this->orderRepository->findFirstWhere([
             'id' => $attendee->getOrderId(),
@@ -135,13 +135,13 @@ class PartialEditAttendeeHandler
             return;
         }
 
-        if ($status === AttendeeStatus::CANCELLED->name) {
+        if ($data->status === AttendeeStatus::CANCELLED->name) {
             $this->eventStatisticsCancellationService->decrementForCancelledAttendee(
                 eventId: $attendee->getEventId(),
                 orderDate: $order->getCreatedAt(),
                 occurrenceId: $attendee->getEventOccurrenceId(),
             );
-        } elseif ($status === AttendeeStatus::ACTIVE->name) {
+        } elseif ($data->status === AttendeeStatus::ACTIVE->name) {
             $this->eventStatisticsReactivationService->incrementForReactivatedAttendee(
                 eventId: $attendee->getEventId(),
                 orderDate: $order->getCreatedAt(),

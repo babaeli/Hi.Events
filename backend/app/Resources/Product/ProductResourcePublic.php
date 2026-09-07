@@ -17,9 +17,7 @@ class ProductResourcePublic extends JsonResource
         return [
             'id' => $this->getId(),
             'title' => $this->getTitle(),
-            /** @var 'PAID'|'FREE'|'DONATION'|'TIERED'|'REGISTRATION' */
             'type' => $this->getType(),
-            /** @var 'TICKET'|'GENERAL' */
             'product_type' => $this->getProductType(),
             'description' => $this->getDescription(),
             'max_per_order' => $this->getMaxPerOrder(),
@@ -56,11 +54,6 @@ class ProductResourcePublic extends JsonResource
             'is_highlighted' => $this->getIsHighlighted(),
             'highlight_message' => $this->getHighlightMessage(),
             'waitlist_enabled' => $this->getWaitlistEnabled(),
-            'is_addon_only' => $this->getIsAddonOnly(),
-            'addon_product_ids' => $this->when(
-                $this->getAddons() !== null,
-                fn () => $this->getAddonProductIds(),
-            ),
         ];
     }
 }

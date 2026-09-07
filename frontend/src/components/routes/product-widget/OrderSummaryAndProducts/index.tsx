@@ -39,7 +39,6 @@ import {OnlineEventDetails} from "../../../common/OnlineEventDetails";
 import {AddToCalendarCTA} from "../../../common/AddToCalendarCTA";
 import {InlineOrderSummary} from "../../../common/InlineOrderSummary";
 import {CheckoutContent} from "../../../layouts/Checkout/CheckoutContent";
-import {CheckoutStepTitle} from "../../../layouts/Checkout/CheckoutStepTitle";
 import {EditAttendeeModal} from "./EditAttendeeModal";
 import {EditOrderModal} from "./EditOrderModal";
 
@@ -583,8 +582,6 @@ export const OrderSummaryAndProducts = () => {
     return (
         <>
             <CheckoutContent>
-                <CheckoutStepTitle title={t`Summary`}/>
-
                 <WelcomeHeader order={order} event={event} allowSelfEdit={allowSelfEdit}/>
 
                 {emailUpdated && (

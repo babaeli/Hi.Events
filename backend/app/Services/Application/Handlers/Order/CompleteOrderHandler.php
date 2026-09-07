@@ -79,8 +79,6 @@ class CompleteOrderHandler
         $updatedOrder = DB::transaction(function () use ($orderData, $orderShortId, $eventSettings) {
             $orderDTO = $orderData->order;
 
-            DB::statement('SELECT pg_advisory_xact_lock(hashtext(?))', [$orderShortId]);
-
             $order = $this->getOrder($orderShortId);
 
             $this->occurrenceStatusValidator->assertOrderOccurrencesArePurchasable($order);
@@ -214,13 +212,12 @@ class CompleteOrderHandler
     private function createOrderQuestions(Collection $questions, OrderDomainObject $order): void
     {
         $questions->each(function (OrderQuestionsDTO $orderQuestionsDTO) use ($order) {
-            $answer = $this->extractAnswer($orderQuestionsDTO->response);
-            if ($answer === null) {
+            if (empty($orderQuestionsDTO->response)) {
                 return;
             }
             $this->questionAnswersRepository->create([
                 'question_id' => $orderQuestionsDTO->question_id,
-                'answer' => $answer,
+                'answer' => $orderQuestionsDTO->response['answer'] ?? $orderQuestionsDTO->response,
                 'order_id' => $order->getId(),
             ]);
         });
@@ -259,31 +256,19 @@ class CompleteOrderHandler
             );
 
             foreach ($productRequestData->questions as $question) {
-                $answer = $this->extractAnswer($question->response);
-                if ($answer === null) {
+                if (empty($question->response)) {
                     continue;
                 }
 
                 $this->questionAnswersRepository->create([
                     'question_id' => $question->question_id,
-                    'answer' => $answer,
+                    'answer' => $question->response['answer'] ?? $question->response,
                     'order_id' => $order->getId(),
                     'product_id' => $productId,
                     'attendee_id' => $insertedAttendee?->getId(),
                 ]);
             }
         }
-    }
-
-    private function extractAnswer(array $response): mixed
-    {
-        $answer = array_key_exists('answer', $response) ? $response['answer'] : $response;
-
-        if ($answer === null || $answer === '' || $answer === []) {
-            return null;
-        }
-
-        return $answer;
     }
 
     /**
@@ -389,27 +374,22 @@ class CompleteOrderHandler
      */
     private function validateTicketProductsCount(OrderDomainObject $order, Collection $attendees): void
     {
-        $orderItems = $order->getOrderItems() ?? collect();
+        $orderAttendeeCount = $order->getOrderItems()
+            ?->filter(fn (OrderItemDomainObject $orderItem) => $orderItem->getProductType() === ProductType::TICKET->name)
+            ?->sum(fn (OrderItemDomainObject $orderItem) => $orderItem->getQuantity());
 
-        $orderTicketCountsByPriceId = $orderItems
-            ->filter(fn (OrderItemDomainObject $orderItem) => $orderItem->getProductType() === ProductType::TICKET->name)
-            ->groupBy(fn (OrderItemDomainObject $orderItem) => $orderItem->getProductPriceId())
-            ->map(fn (Collection $items) => $items->sum(fn (OrderItemDomainObject $item) => $item->getQuantity()));
-
-        $attendeeTicketCountsByPriceId = $attendees
+        $ticketAttendeeCount = $attendees
             ->filter(
                 fn (CompleteOrderProductDataDTO $attendee) => $this->getProductTypeFromPriceId(
                     $attendee->product_price_id,
-                    $orderItems
+                    $order->getOrderItems()
                 ) === ProductType::TICKET->name)
-            ->countBy(fn (CompleteOrderProductDataDTO $attendee) => $attendee->product_price_id);
+            ->count();
 
-        foreach ($orderTicketCountsByPriceId as $priceId => $expectedCount) {
-            if (($attendeeTicketCountsByPriceId[$priceId] ?? 0) !== $expectedCount) {
-                throw new ResourceConflictException(
-                    __('The number of attendees does not match the number of tickets in the order')
-                );
-            }
+        if ($orderAttendeeCount !== $ticketAttendeeCount) {
+            throw new ResourceConflictException(
+                __('The number of attendees does not match the number of tickets in the order')
+            );
         }
     }
 

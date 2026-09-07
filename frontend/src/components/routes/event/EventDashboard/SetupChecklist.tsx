@@ -112,8 +112,8 @@ export const SetupChecklist = ({
             key: 'publish',
             title: t`Publish your event`,
             helperIncomplete: t`Make it visible so people can buy tickets`,
-            helperComplete: event.status === 'PENDING_MANUAL_REVIEW' ? t`Pending review` : t`Live`,
-            complete: event.status === 'LIVE' || event.status === 'PENDING_MANUAL_REVIEW',
+            helperComplete: t`Live`,
+            complete: event.status === 'LIVE',
             actionLabel: t`Publish`,
             actionStyle:
                 isRecurring

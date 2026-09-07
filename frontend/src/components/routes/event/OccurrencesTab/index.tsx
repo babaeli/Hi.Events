@@ -29,7 +29,7 @@ import {getEventLocationDisplay} from "../../../../utilites/effectiveLocation.ts
 import {formatCurrency} from "../../../../utilites/currency.ts";
 import {OccurrenceEditModal} from "./OccurrenceEditModal";
 import {OccurrenceBulkEditModal} from "./OccurrenceBulkEditModal";
-import {RecurrenceScheduleDrawer} from "./RecurrenceScheduleDrawer";
+import {RecurrenceScheduleModal} from "./RecurrenceScheduleModal";
 import {CalendarView} from "./CalendarView";
 import {useCancelOccurrence} from "../../../../mutations/useCancelOccurrence.ts";
 import {useDeleteEventOccurrence} from "../../../../mutations/useDeleteEventOccurrence.ts";
@@ -495,27 +495,13 @@ const OccurrencesTab = () => {
                 {selectedIds.size > 0 && (
                     <div className={classes.selectionGroup}>
                         <span className={classes.selectionCount}>{selectedIds.size} {t`selected`}</span>
-                        <button
-                            className={classes.selectionAction}
-                            data-danger
-                            data-testid="occurrence-bulk-cancel-button"
-                            onClick={handleBulkCancel}
-                        >
+                        <button className={classes.selectionAction} data-danger onClick={handleBulkCancel}>
                             {t`Cancel`}
                         </button>
-                        <button
-                            className={classes.selectionAction}
-                            data-danger
-                            data-testid="occurrence-bulk-delete-button"
-                            onClick={handleBulkDelete}
-                        >
+                        <button className={classes.selectionAction} data-danger onClick={handleBulkDelete}>
                             {t`Delete`}
                         </button>
-                        <button
-                            className={classes.selectionAction}
-                            data-testid="occurrence-bulk-clear-selection-button"
-                            onClick={() => setSelectedIds(new Set())}
-                        >
+                        <button className={classes.selectionAction} onClick={() => setSelectedIds(new Set())}>
                             {t`Clear`}
                         </button>
                         <div className={classes.toolbarDivider}/>
@@ -527,7 +513,6 @@ const OccurrencesTab = () => {
                     variant="light"
                     leftSection={<IconPencil size={14}/>}
                     onClick={openBulkEdit}
-                    data-testid="occurrence-bulk-edit-button"
                 >
                     {t`Bulk Edit`}
                 </Button>
@@ -678,7 +663,7 @@ const OccurrencesTab = () => {
             )}
 
             {generateOpen && (
-                <RecurrenceScheduleDrawer onClose={closeGenerate} onGenerationStarted={generationPolling.start}/>
+                <RecurrenceScheduleModal onClose={closeGenerate} onGenerationStarted={generationPolling.start}/>
             )}
 
             {slideoutOccurrenceId && (

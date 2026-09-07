@@ -292,7 +292,7 @@ class OrderDomainObject extends Generated\OrderDomainObjectAbstract implements I
     {
         return ! $this->isFreeOrder()
             && $this->getStatus() !== OrderPaymentStatus::AWAITING_OFFLINE_PAYMENT->name
-            && in_array($this->getPaymentProvider(), [PaymentProviders::STRIPE->name, PaymentProviders::OFFLINE->name], true)
+            && $this->getPaymentProvider() === PaymentProviders::STRIPE->name
             && $this->getRefundStatus() !== OrderRefundStatus::REFUNDED->name;
     }
 

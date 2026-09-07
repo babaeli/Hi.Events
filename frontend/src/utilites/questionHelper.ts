@@ -15,14 +15,8 @@ export const isAddress = (obj: any) => {
     return addressFields.some(field => field in obj);
 };
 
-const unwrapAnswer = (answer: any) =>
-    answer && typeof answer === 'object' && !Array.isArray(answer) && Object.keys(answer).length === 1 && 'answer' in answer
-        ? answer.answer
-        : answer;
-
-export const formatAnswer = (rawAnswer: any) => {
-    const answer = unwrapAnswer(rawAnswer);
-    if (answer === null || answer === undefined || answer === '') return '';
+export const formatAnswer = (answer: any) => {
+    if (answer === null || answer === undefined) return '';
 
     if (Array.isArray(answer)) {
         return answer.join(", ");

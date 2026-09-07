@@ -3,7 +3,6 @@ import {IdParam} from "../types.ts";
 import {GET_EVENT_OCCURRENCES_QUERY_KEY} from "../queries/useGetEventOccurrences.ts";
 import {GET_EVENT_OCCURRENCE_QUERY_KEY} from "../queries/useGetEventOccurrence.ts";
 import {eventOccurrenceClient} from "../api/event-occurrence.client.ts";
-import {GET_EVENT_QUERY_KEY} from "../queries/useGetEvent.ts";
 
 export const useCancelOccurrence = () => {
     const queryClient = useQueryClient();
@@ -19,10 +18,7 @@ export const useCancelOccurrence = () => {
             queryClient.invalidateQueries({
                 queryKey: [GET_EVENT_OCCURRENCE_QUERY_KEY, variables.eventId, variables.occurrenceId]
             });
-            return Promise.all([
-                queryClient.invalidateQueries({queryKey: [GET_EVENT_OCCURRENCES_QUERY_KEY]}),
-                queryClient.invalidateQueries({queryKey: [GET_EVENT_QUERY_KEY]}),
-            ]);
+            return queryClient.invalidateQueries({queryKey: [GET_EVENT_OCCURRENCES_QUERY_KEY]});
         }
     });
 };

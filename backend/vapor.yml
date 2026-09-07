@@ -6,7 +6,6 @@ environments:
     domain: api.hi.events
     memory: 2048
     cli-memory: 512
-    cli-timeout: 900
     storage: hievents-assets-prod
     runtime: docker
     warm: 3
@@ -29,7 +28,6 @@ environments:
     domain: staging-api.hi.events
     memory: 1024
     cli-memory: 512
-    cli-timeout: 900
     runtime: docker
     warm: 3
     scheduler: true

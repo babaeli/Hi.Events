@@ -54,7 +54,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => array_values(array_filter(array_map('trim', explode(',', (string) env('LOG_STACK', 'single'))))) ?: ['single'],
+            'channels' => ['single'],
             'ignore_exceptions' => false,
         ],
 
@@ -116,11 +116,6 @@ return [
             'driver' => 'errorlog',
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
-        ],
-
-        'sentry_logs' => [
-            'driver' => 'sentry_logs',
-            'level' => env('SENTRY_LOG_LEVEL', 'info'),
         ],
 
         'null' => [

@@ -26,7 +26,6 @@ export const DangerZoneSettings = () => {
     const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
     const isArchived = event?.status === EventStatus.ARCHIVED;
-    const isPendingReview = event?.status === EventStatus.PENDING_MANUAL_REVIEW;
     const deleteConfirmationPhrase = t`delete`;
     const isDeleteConfirmed = deleteConfirmation.trim().toLocaleLowerCase() === deleteConfirmationPhrase.toLocaleLowerCase();
 
@@ -125,11 +124,9 @@ export const DangerZoneSettings = () => {
             <DangerZoneSection
                 title={isArchived ? t`Restore Event` : t`Archive Event`}
                 description={
-                    isPendingReview
-                        ? t`This event is pending manual review. Its status cannot be changed until the review is complete.`
-                        : isArchived
-                            ? t`Restore this event to make it visible again.`
-                            : t`Archive this event to hide it from the public. You can restore it later.`
+                    isArchived
+                        ? t`Restore this event to make it visible again.`
+                        : t`Archive this event to hide it from the public. You can restore it later.`
                 }
                 action={
                     <Button
@@ -137,7 +134,6 @@ export const DangerZoneSettings = () => {
                         variant="outline"
                         onClick={handleArchiveToggle}
                         loading={statusMutation.isPending}
-                        disabled={isPendingReview}
                         leftSection={isArchived ? <IconArrowBackUp size={16}/> : <IconArchive size={16}/>}
                     >
                         {isArchived ? t`Restore Event` : t`Archive Event`}

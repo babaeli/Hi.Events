@@ -88,12 +88,7 @@ const OrganizerLayout = () => {
             },
         ] as NavItem[] : []),
         { label: 'Overview' },
-        {
-            link: 'dashboard',
-            label: t`Organizer Dashboard`,
-            icon: IconDashboard,
-            isActive: (isActive) => isActive || /\/manage\/organizer(\/[^/]+)?\/?$/.test(location.pathname),
-        },
+        { link: 'dashboard', label: t`Organizer Dashboard`, icon: IconDashboard },
         {
             link: 'reports',
             label: t`Reports`,

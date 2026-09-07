@@ -28,7 +28,7 @@ import {
 import {t} from "@lingui/macro";
 import {useGetEvent} from "../../../queries/useGetEvent";
 import {useGetEventSettings} from "../../../queries/useGetEventSettings";
-import {useGetEventCounts} from "../../../queries/useGetEventCounts";
+import {useGetEventStats} from "../../../queries/useGetEventStats";
 import {useGeoStatus} from "../../../queries/useGeoStatus.ts";
 import Truncate from "../../common/Truncate";
 import {BreadcrumbItem, NavItem} from "../AppLayout/types.ts";
@@ -66,7 +66,7 @@ const EventLayout = () => {
 
     const {data: event, isFetched: isEventFetched} = useGetEvent(eventId);
     const {isFetched: isEventSettingsFetched} = useGetEventSettings(eventId);
-    const {data: eventCounts} = useGetEventCounts(eventId);
+    const {data: eventStats} = useGetEventStats(eventId);
     const {data: me} = useGetMe();
 
     const resendEmailConfirmationMutation = useResendEmailConfirmation();
@@ -122,13 +122,13 @@ const EventLayout = () => {
         // 3. Ticketing & Sales
         {label: t`Ticketing & Sales`},
         {link: 'products', label: t`Tickets & Products`, icon: IconTicket},
-        {link: 'orders', label: t`Orders`, icon: IconReceipt, badge: eventCounts?.total_orders},
+        {link: 'orders', label: t`Orders`, icon: IconReceipt, badge: eventStats?.total_orders},
         {link: 'promo-codes', label: t`Promo Codes`, icon: IconDiscount2},
         {link: 'affiliates', label: t`Affiliates`, icon: IconTrendingUp},
 
         // 4. GUESTS
         {label: t`Guest Management`},
-        {link: 'attendees', label: t`Attendees`, icon: IconUsers, badge: eventCounts?.total_attendees_registered},
+        {link: 'attendees', label: t`Attendees`, icon: IconUsers, badge: eventStats?.total_attendees_registered},
         {link: 'check-in', label: t`Check-In Lists`, icon: IconQrcode},
         {link: 'messages', label: t`Messages`, icon: IconSend},
         {link: 'sold-out-waitlist', label: t`Waitlist`, icon: IconListCheck},
@@ -175,11 +175,6 @@ const EventLayout = () => {
     ];
 
     const handleStatusToggle = () => {
-        if (event?.status === 'PENDING_MANUAL_REVIEW') {
-            showError(t`This event is pending manual review and cannot be published until the review is complete.`);
-            return;
-        }
-
         if (event?.status !== 'LIVE') {
             openPublishModal();
             return;
@@ -214,16 +209,14 @@ const EventLayout = () => {
                             onClick={handleStatusToggle}
                             data-testid="event-status-toggle"
                             size="sm"
-                            leftSection={(event?.status === 'DRAFT' || event?.status === 'PENDING_MANUAL_REVIEW') ? <IconEyeOff size={16}/> : <IconEye size={16}/>}
+                            leftSection={event?.status === 'DRAFT' ? <IconEyeOff size={16}/> : <IconEye size={16}/>}
                             rightSection={<IconChevronRight size={14}/>}
                         >
-                            {event?.status === 'PENDING_MANUAL_REVIEW'
-                                ? <span>{t`Pending Review`}</span>
-                                : event?.status === 'DRAFT'
-                                    ? <span>{t`Draft`} <span
-                                        className={classes.statusAction}>{t`- Click to Publish`}</span></span>
-                                    : <span>{t`Live`} <span
-                                        className={classes.statusAction}>{t`- Click to Unpublish`}</span></span>
+                            {event?.status === 'DRAFT'
+                                ? <span>{t`Draft`} <span
+                                    className={classes.statusAction}>{t`- Click to Publish`}</span></span>
+                                : <span>{t`Live`} <span
+                                    className={classes.statusAction}>{t`- Click to Unpublish`}</span></span>
                             }
                         </TopBarButton>
                     )}

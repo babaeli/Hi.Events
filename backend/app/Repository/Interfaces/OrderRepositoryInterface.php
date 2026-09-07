@@ -53,6 +53,4 @@ interface OrderRepositoryInterface extends RepositoryInterface
     ): LengthAwarePaginator;
 
     public function hasCompletedPaidOrderForAccount(int $accountId): bool;
-
-    public function accountHasCompletedOrders(int $accountId): bool;
 }

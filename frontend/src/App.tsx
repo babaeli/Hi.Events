@@ -5,9 +5,9 @@ import {i18n} from "@lingui/core";
 import {I18nProvider} from "@lingui/react";
 import {ModalsProvider} from "@mantine/modals";
 import {DatesProvider} from "@mantine/dates";
-import {DehydratedState, HydrationBoundary, QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {HydrationBoundary, QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {Helmet, HelmetProvider} from "react-helmet-async";
-import type {ThemeColors} from "./utilites/themeColors.ts";
+import {generateColors} from '@mantine/colors-generator';
 
 import "@mantine/core/styles/global.css";
 import "@mantine/core/styles.css";
@@ -23,6 +23,7 @@ import {ThirdPartyScripts} from "./components/common/ThirdPartyScripts";
 import {getConfig} from "./utilites/config.ts";
 import {CookieConsentBanner} from "./components/common/CookieConsentBanner";
 import {isConsentPending, setConsentState, updateGoogleConsentMode} from "./utilites/trackingPixels/consent";
+import "./utilites/dateLocales.ts";
 
 declare global {
     interface Window {
@@ -34,9 +35,8 @@ export const App: FC<
     PropsWithChildren<{
         queryClient: QueryClient;
         locale: string;
-        themeColors: ThemeColors;
         helmetContext?: any;
-        dehydratedState?: DehydratedState;
+        dehydratedState?: unknown;
     }>
 > = (props) => {
     const [isLoadedOnBrowser, setIsLoadedOnBrowser] = React.useState(false);
@@ -75,7 +75,10 @@ export const App: FC<
             <MantineProvider
                 cssVariablesResolver={v8CssVariablesResolver}
                 theme={{
-                    colors: props.themeColors,
+                    colors: {
+                        primary: generateColors(getConfig("VITE_APP_PRIMARY_COLOR", "#40296C") as string),
+                        secondary: generateColors(getConfig("VITE_APP_SECONDARY_COLOR", "#3d0b44") as string),
+                    },
                     primaryColor: "primary",
                     fontFamily: "Outfit, sans-serif",
                     primaryShade: 8,
