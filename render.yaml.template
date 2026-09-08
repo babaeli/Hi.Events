@@ -1,0 +1,112 @@
+# Hi.Events - Render.com Deployment Configuration
+# Template: Replace YOUR-APP-NAME with your actual Render URL
+
+services:
+  - type: web
+    name: hi-events
+    runtime: docker
+    plan: free
+    envVars:
+      # Security Keys (auto-generated)
+      - key: APP_KEY
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGO
+        value: "HS256"
+      - key: JWT_TTL
+        value: "604800"
+
+      # Application Settings
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_ENV
+        value: "production"
+      - key: LOG_CHANNEL
+        value: "stack"
+      - key: LOG_LEVEL
+        value: "warning"
+
+      # SaaS Mode
+      - key: APP_SAAS_MODE_ENABLED
+        value: "true"
+      - key: APP_DISABLE_REGISTRATION
+        value: "false"
+
+      # Mail (using log driver for testing)
+      - key: MAIL_MAILER
+        value: "log"
+
+      # Cache & Queue
+      - key: CACHE_DRIVER
+        value: "redis"
+      - key: QUEUE_DRIVER
+        value: "redis"
+      - key: QUEUE_CONNECTION
+        value: "redis"
+      - key: FILESYSTEM_DISK
+        value: "local"
+
+      # ⚠️ CRITICAL: Replace YOUR-APP-NAME with your actual Render URL
+      # Example: hi-events-abc123.onrender.com
+      - key: VITE_API_URL_CLIENT
+        value: "https://YOUR-APP-NAME.onrender.com/api"
+      - key: VITE_API_URL_SERVER
+        value: "http://127.0.0.1/api"
+      - key: VITE_FRONTEND_URL
+        value: "https://YOUR-APP-NAME.onrender.com"
+      - key: APP_URL
+        value: "https://YOUR-APP-NAME.onrender.com"
+      - key: APP_FRONTEND_URL
+        value: "https://YOUR-APP-NAME.onrender.com"
+      - key: APP_CDN_URL
+        value: "https://YOUR-APP-NAME.onrender.com/storage"
+
+      # Database Connection (auto-configured from Render PostgreSQL)
+      - key: DB_CONNECTION
+        value: "pgsql"
+      - key: DB_HOST
+        fromDatabase:
+          name: postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: postgres
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: postgres
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: postgres
+          property: password
+
+      # Redis Connection (auto-configured from Render Redis)
+      - key: REDIS_HOST
+        fromDatabase:
+          name: redis
+          property: host
+      - key: REDIS_PORT
+        fromDatabase:
+          name: redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromDatabase:
+          name: redis
+          property: password
+
+# Free tier databases
+databases:
+  - name: postgres
+    plan: free
+    version: "15"
+    ipAllowList: []
+
+  - name: redis
+    plan: free
+    ipAllowList: []
