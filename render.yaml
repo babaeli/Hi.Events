@@ -36,6 +36,14 @@ services:
         value: "https://hi-events-g3dx.onrender.com/api"
       - key: VITE_API_URL_SERVER
         value: "http://127.0.0.1/api"
+      - key: VITE_FRONTEND_URL
+        value: "https://hi-events-g3dx.onrender.com"
+      - key: APP_URL
+        value: "https://hi-events-g3dx.onrender.com"
+      - key: APP_FRONTEND_URL
+        value: "https://hi-events-g3dx.onrender.com"
+      - key: APP_CDN_URL
+        value: "https://hi-events-g3dx.onrender.com/storage"
       - key: DB_CONNECTION
         value: "pgsql"
       - key: DB_HOST

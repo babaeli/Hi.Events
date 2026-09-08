@@ -76,6 +76,14 @@ spec:
       value: "https://hi-events.koyeb.app/api"
     - name: VITE_API_URL_SERVER
       value: "http://localhost/api"
+    - name: VITE_FRONTEND_URL
+      value: "https://hi-events.koyeb.app"
+    - name: APP_URL
+      value: "https://hi-events.koyeb.app"
+    - name: APP_FRONTEND_URL
+      value: "https://hi-events.koyeb.app"
+    - name: APP_CDN_URL
+      value: "https://hi-events.koyeb.app/storage"
 
     # Mail
     - name: MAIL_MAILER
