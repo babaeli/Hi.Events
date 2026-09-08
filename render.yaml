@@ -1,0 +1,84 @@
+services:
+  - type: web
+    name: hi-events
+    runtime: docker
+    plan: free
+    envVars:
+      - key: APP_KEY
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGO
+        value: "HS256"
+      - key: JWT_TTL
+        value: "604800"
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_ENV
+        value: "production"
+      - key: LOG_CHANNEL
+        value: "stack"
+      - key: MAIL_MAILER
+        value: "log"
+      - key: APP_SAAS_MODE_ENABLED
+        value: "true"
+      - key: APP_DISABLE_REGISTRATION
+        value: "false"
+      - key: LOG_LEVEL
+        value: "warning"
+      - key: QUEUE_DRIVER
+        value: "redis"
+      - key: CACHE_DRIVER
+        value: "redis"
+      - key: FILESYSTEM_DISK
+        value: "local"
+      - key: VITE_API_URL_CLIENT
+        value: "https://hi-events-g3dx.onrender.com/api"
+      - key: VITE_API_URL_SERVER
+        value: "http://127.0.0.1/api"
+      - key: DB_CONNECTION
+        value: "pgsql"
+      - key: DB_HOST
+        fromDatabase:
+          name: postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: postgres
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: postgres
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: postgres
+          property: password
+      - key: REDIS_HOST
+        fromDatabase:
+          name: redis
+          property: host
+      - key: REDIS_PORT
+        fromDatabase:
+          name: redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromDatabase:
+          name: redis
+          property: password
+      - key: QUEUE_CONNECTION
+        value: "redis"
+
+databases:
+  - name: postgres
+    plan: free
+    version: "15"
+    ipAllowList: []
+
+  - name: redis
+    plan: free
+    ipAllowList: []

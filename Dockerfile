@@ -12,15 +12,35 @@ COPY ./frontend/package.json ./frontend/yarn.lock ./
 COPY ./frontend .
 COPY ./VERSION /app/VERSION
 
-# Build frontend with environment variables
+# DEPLOYMENT: 2026-09-07 - Forced rebuild with API routing fixes
+# Frontend: yarn build with --prod false
+# Backend: Laravel API routing
+# Nginx: Exact prefix match for /api routes
+# PHP-FPM: TCP port 9000 configuration
 ARG VITE_API_URL_CLIENT=https://hi-events-g3dx.onrender.com/api
 ARG VITE_API_URL_SERVER=http://127.0.0.1/api
 
 ENV VITE_API_URL_CLIENT=$VITE_API_URL_CLIENT
 ENV VITE_API_URL_SERVER=$VITE_API_URL_SERVER
 ENV NODE_ENV=production
+# Ensure node_modules/.bin is in PATH for yarn scripts
+ENV PATH="/app/frontend/node_modules/.bin:$PATH"
 
-RUN yarn install --network-timeout 600000 --prod false && yarn build
+RUN echo "Installing frontend dependencies..." && \
+    yarn install --network-timeout 600000 --prod false && \
+    echo "✓ Frontend dependencies installed" && \
+    echo "Building frontend..." && \
+    yarn build && \
+    echo "✓ Frontend build completed successfully" && \
+    if [ -d "dist" ]; then \
+        echo "✓ dist folder found"; \
+        ls -lah dist/; \
+        if [ -d "dist/client" ]; then echo "✓ dist/client found - $(find dist/client -type f | wc -l) files"; else echo "✗ dist/client NOT found"; exit 1; fi; \
+        if [ -d "dist/server" ]; then echo "✓ dist/server found - $(find dist/server -type f | wc -l) files"; else echo "✗ dist/server NOT found"; exit 1; fi; \
+    else \
+        echo "✗ dist folder NOT found after build - build may have failed!"; \
+        exit 1; \
+    fi
 
 # Use stable multi-arch serversideup/php image
 FROM serversideup/php:8.5-fpm-alpine
@@ -59,6 +79,7 @@ COPY ./docker/all-in-one/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./docker/all-in-one/supervisor/supervisord.conf /etc/supervisord.conf
 
 COPY ./docker/all-in-one/scripts/startup.sh /startup.sh
+COPY ./startup-render.sh /startup.sh
 RUN dos2unix /startup.sh && chmod +x /startup.sh
 
 EXPOSE 80
