@@ -3,6 +3,7 @@
 namespace HiEvents\Http;
 
 use HiEvents\Http\Middleware\Authenticate;
+use HiEvents\Http\Middleware\AutoLoginDevelopment;
 use HiEvents\Http\Middleware\EncryptCookies;
 use HiEvents\Http\Middleware\HandleDeprecatedTimezones;
 use HiEvents\Http\Middleware\LogImpersonationMiddleware;
@@ -68,6 +69,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            AutoLoginDevelopment::class, // Auto-login as SUPERADMIN for development
             ThrottleRequests::class.':api',
             SubstituteBindings::class,
             SetAccountContext::class,
